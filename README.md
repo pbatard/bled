@@ -3,7 +3,7 @@ Bled - BusyBox Library for Easy Decompression
 
 ## What's this then?
 
-This is _Bled_, the __B__usyBox __L__ibrary for __E__asy __D__ecompression.
+This is _Bled_, the <b>B</b>usyBox <b>L</b>ibrary for <b>E</b>asy <b>D</b>ecompression.
 
 ## What's it for?
 
@@ -80,4 +80,4 @@ Then either use the `.sln` file or run `configure` + `make`.
 
 ## Is the name a reference to _Bled, Slovenia_?
 
-It is. You should visit Slovenia too, if you ever have a chance.
+It is. And you should visit Slovenia too, if you ever have a chance.

@@ -10,12 +10,10 @@
 #include "bb_archive.h"
 #include "bled.h"
 
-typedef int smallint;
 smallint bb_got_signal;
 
 static int64_t bled_unpack(const char* src, const char* dst, long long int (*unpacker)(transformer_state_t *xstate))
 {
-	int64_t status = 0;
 	transformer_state_t xstate;
 
 	init_transformer_state(&xstate);

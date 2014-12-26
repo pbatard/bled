@@ -76,7 +76,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-subdir = src/bled
+subdir = src
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -94,8 +94,8 @@ am__v_AR_0 = @echo "  AR      " $@;
 am__v_AR_1 = 
 libbled_a_AR = $(AR) $(ARFLAGS)
 libbled_a_LIBADD =
-am_libbled_a_OBJECTS = libbled_a-bb_crc32.$(OBJEXT) \
-	libbled_a-data_align.$(OBJEXT) \
+am_libbled_a_OBJECTS = libbled_a-bled.$(OBJEXT) \
+	libbled_a-crc32.$(OBJEXT) libbled_a-data_align.$(OBJEXT) \
 	libbled_a-data_extract_all.$(OBJEXT) \
 	libbled_a-data_skip.$(OBJEXT) \
 	libbled_a-decompress_bunzip2.$(OBJEXT) \
@@ -221,7 +221,6 @@ STRIP = @STRIP@
 SUFFIX = @SUFFIX@
 VERSION = @VERSION@
 VISIBILITY_CFLAGS = @VISIBILITY_CFLAGS@
-WINDRES = @WINDRES@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -263,7 +262,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 noinst_LIBRARIES = libbled.a
-libbled_a_SOURCES = bb_crc32.c data_align.c data_extract_all.c data_skip.c decompress_bunzip2.c \
+libbled_a_SOURCES = bled.c crc32.c data_align.c data_extract_all.c data_skip.c decompress_bunzip2.c \
   decompress_gunzip.c decompress_uncompress.c decompress_unlzma.c decompress_unxz.c \
   filter_accept_all.c filter_accept_list.c filter_accept_reject_list.c find_list_entry.c \
   header_list.c header_skip.c header_verbose_list.c init_handle.c open_transformer.c \
@@ -283,9 +282,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign --ignore-deps src/bled/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign --ignore-deps src/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign --ignore-deps src/bled/Makefile
+	  $(AUTOMAKE) --foreign --ignore-deps src/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -325,11 +324,17 @@ distclean-compile:
 .c.obj:
 	$(AM_V_CC)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
-libbled_a-bb_crc32.o: bb_crc32.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-bb_crc32.o `test -f 'bb_crc32.c' || echo '$(srcdir)/'`bb_crc32.c
+libbled_a-bled.o: bled.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-bled.o `test -f 'bled.c' || echo '$(srcdir)/'`bled.c
 
-libbled_a-bb_crc32.obj: bb_crc32.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-bb_crc32.obj `if test -f 'bb_crc32.c'; then $(CYGPATH_W) 'bb_crc32.c'; else $(CYGPATH_W) '$(srcdir)/bb_crc32.c'; fi`
+libbled_a-bled.obj: bled.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-bled.obj `if test -f 'bled.c'; then $(CYGPATH_W) 'bled.c'; else $(CYGPATH_W) '$(srcdir)/bled.c'; fi`
+
+libbled_a-crc32.o: crc32.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-crc32.o `test -f 'crc32.c' || echo '$(srcdir)/'`crc32.c
+
+libbled_a-crc32.obj: crc32.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-crc32.obj `if test -f 'crc32.c'; then $(CYGPATH_W) 'crc32.c'; else $(CYGPATH_W) '$(srcdir)/crc32.c'; fi`
 
 libbled_a-data_align.o: data_align.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-data_align.o `test -f 'data_align.c' || echo '$(srcdir)/'`data_align.c

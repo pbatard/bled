@@ -6,6 +6,10 @@
  * Licensed under GPLv2 or later, see file LICENSE in this source tree.
  */
 
+#if defined(_MSC_VER)
+#pragma warning(disable: 4996)		// Ignore deprecated
+#endif
+
 #include <stdio.h>
 #include "../src/bled.h"
 
@@ -36,8 +40,8 @@ int main(int argc, char** argv)
 	char src[256], dst[256];
 
 	for (i = 0; i<ARRAYSIZE(test_files); i++) {
-		sprintf_s(src, sizeof(src), "%s%s.%s", BASE_PATH, BASE_FILE, test_files[i].ext);
-		sprintf_s(dst, sizeof(dst), "%s!%s.txt", BASE_PATH, test_files[i].ext);
+		sprintf(src, "%s%s.%s", BASE_PATH, BASE_FILE, test_files[i].ext);
+		sprintf(dst, "%s!%s.txt", BASE_PATH, test_files[i].ext);
 		r = bled_uncompress(src, dst, test_files[i].type);
 		printf("%s: %I64d\n", test_files[i].ext, r);
 	}
