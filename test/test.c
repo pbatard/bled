@@ -13,6 +13,8 @@
 #include <stdio.h>
 #include "../src/bled.h"
 
+printf_t print_function = NULL;
+
 #define BASE_PATH "D:\\bled\\test\\data\\"
 #define BASE_FILE "xz"
 

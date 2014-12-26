@@ -134,9 +134,8 @@ extern const char *bb_mode_string(mode_t mode);
 
 #define mkdir(x, y) _mkdir(x)
 
-/* Define the following to the printf-like function you want to use for text output */
-#define bb_printf printf
-//extern void bb_printf(const char *format, ...);
+extern void (*print_function)(const char *format, ...);
+#define bb_printf(...) do {(print_function != NULL)?print_function(__VA_ARGS__):printf(__VA_ARGS__);} while(0)
 
 #define bb_error_msg bb_printf
 #define bb_error_msg_and_die(...) do {bb_printf(__VA_ARGS__); goto err;} while(0)

@@ -10,6 +10,12 @@
 
 #pragma once
 
+typedef void (*printf_t) (const char* format, ...);
+
+// Define the following to the printf-like function you want to use for outputg,
+// or set it to NULL to use printf(...)
+extern printf_t print_function;
+
 #define BLED_COMPRESSION_ZIP     1	// .zip
 #define BLED_COMPRESSION_7ZIP    2	// .7z
 #define BLED_COMPRESSION_LZW     3	// .Z

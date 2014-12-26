@@ -60,7 +60,7 @@ Not planning to add support for that either.
   to a buffer, at least for lzma and xz, since I'm gonna need that.
 * Can't query the uncompressed size for now, but I'll add that.
 * .zip and .7z archive extraction to a directory is not currently supported. But I'll
-   probably need that eventaully, so I'm planning to add it then. .zip archive support
+   probably need that eventually, so I'm planning to add it then. .zip archive support
    shouldn't be much of problem, since BusyBox already had it. .7z will be a different
    story, as it looks like this will need to be created from scratch.
 * No multithreading or progress support. But once extraction to a buffer is implemented
