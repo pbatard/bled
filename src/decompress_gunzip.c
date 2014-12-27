@@ -935,7 +935,7 @@ static int inflate_get_next_window(STATE_PARAM_ONLY)
 	gunzip_outbuf_count = 0;
 
 	while (1) {
-		int ret;
+		int ret = 0;
 
 		if (need_another_block) {
 			if (end_reached) {

@@ -6,11 +6,18 @@
  * Licensed under GPLv2 or later, see file LICENSE in this source tree.
  */
 
+#ifdef _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#endif
+
 #include "libbb.h"
 #include "bb_archive.h"
 #include "bled.h"
 
 smallint bb_got_signal;
+printf_t bled_printf = NULL;
+static bool in_use = 0;
 
 static int64_t bled_unpack(const char* src, const char* dst, long long int (*unpacker)(transformer_state_t *xstate))
 {
@@ -54,4 +61,21 @@ int64_t bled_uncompress(const char* src, const char* dst, int type)
 		bb_printf("unsupported compression");
 		return -1;
 	}
+}
+
+int bled_init(printf_t print_function)
+{
+	if (in_use)
+		return -1;
+
+	bled_printf = print_function;
+	return 0;
+}
+
+void bled_exit(void)
+{
+	bled_printf = NULL;
+	if (global_crc32_table)
+		free(global_crc32_table);
+	in_use = 0;
 }

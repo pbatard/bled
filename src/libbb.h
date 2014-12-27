@@ -7,6 +7,12 @@
  * Licensed under GPLv2 or later, see file LICENSE in this source tree.
  */
 
+/* Memory leaks detection - define _CRTDBG_MAP_ALLOC as preprocessor macro */
+#ifdef _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#endif
+
 #ifndef LIBBB_H
 #define LIBBB_H 1
 
@@ -127,16 +133,22 @@ extern const char *bb_mode_string(mode_t mode);
 
 #define xmalloc malloc
 #define xzalloc(x) calloc(x, 1)
-#define xrealloc realloc
 #define malloc_or_warn malloc
 #define xopen3 open
+
+static inline void *xrealloc(void *ptr, size_t size) {
+	void *ret = realloc(ptr, size);
+	if (!ret)
+		free(ptr);
+	return ret;
+}
 
 #define xfunc_die()
 
 #define mkdir(x, y) _mkdir(x)
 
-extern void (*print_function)(const char *format, ...);
-#define bb_printf(...) do {(print_function != NULL)?print_function(__VA_ARGS__):printf(__VA_ARGS__);} while(0)
+extern void(*bled_printf)(const char* format, ...);
+#define bb_printf(...) do {(bled_printf != NULL)?bled_printf(__VA_ARGS__):printf(__VA_ARGS__);} while(0)
 
 #define bb_error_msg bb_printf
 #define bb_error_msg_and_die(...) do {bb_printf(__VA_ARGS__); return;} while(0)
