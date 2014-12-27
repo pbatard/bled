@@ -48,8 +48,10 @@ int main(int argc, char** argv)
 		printf("%s: %I64d\n", test_files[i].ext, r);
 	}
 
-	printf("Press <ENTER> to exit.");
+#if defined(_MSC_VER) && defined(_DEBUG)
+	printf("Press <ENTER> to exit.\n");
 	while(getchar() != '\n');
+#endif
 
 	return 0;
 }
