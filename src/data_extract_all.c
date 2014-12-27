@@ -31,7 +31,7 @@ void FAST_FUNC data_extract_all(archive_handle_t *archive_handle)
 			*slash = '/';
 		}
 	}
-#if 0
+
 	if (archive_handle->ah_flags & ARCHIVE_UNLINK_OLD) {
 		/* Remove the entry if it exists */
 		if (!S_ISDIR(file_header->mode)) {
@@ -101,7 +101,7 @@ void FAST_FUNC data_extract_all(archive_handle_t *archive_handle)
 		/* Hardlinks have no separate mode/ownership, skip chown/chmod */
 		goto ret;
 	}
-#endif
+
 	/* Create the filesystem entry */
 	switch (file_header->mode & S_IFMT) {
 	case S_IFREG: {
@@ -140,7 +140,6 @@ void FAST_FUNC data_extract_all(archive_handle_t *archive_handle)
 			bb_perror_msg("can't make dir %s", file_header->name);
 		}
 		break;
-#if 0
 	case S_IFLNK:
 		/* Symlink */
 //TODO: what if file_header->link_target == NULL (say, corrupted tarball?)
@@ -165,12 +164,10 @@ void FAST_FUNC data_extract_all(archive_handle_t *archive_handle)
 			bb_perror_msg("can't create node %s", file_header->name);
 		}
 		break;
-#endif
 	default:
 		bb_error_msg_and_die("unrecognized file type");
 	}
 
-#if 0
 	if (!S_ISLNK(file_header->mode)) {
 		if (!(archive_handle->ah_flags & ARCHIVE_DONT_RESTORE_OWNER)) {
 			uid_t uid = file_header->uid;
@@ -207,13 +204,10 @@ void FAST_FUNC data_extract_all(archive_handle_t *archive_handle)
 	}
 
  ret: ;
-#endif
 #if ENABLE_FEATURE_TAR_SELINUX
 	if (sctx) {
 		/* reset the context after creating an entry */
 		setfscreatecon(NULL);
 	}
 #endif
-err:
-	;
 }

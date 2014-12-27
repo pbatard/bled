@@ -15,6 +15,7 @@
 #endif
 
 #if defined(_MSC_VER)
+#pragma warning(disable: 4715)		// not all control paths return a value
 #pragma warning(disable: 4996)		// Ignore deprecated
 #endif
 
@@ -119,7 +120,7 @@ uint32_t crc32_be(uint32_t crc, unsigned char const *p, size_t len, uint32_t *cr
 
 #define full_read read
 #define full_write write
-#define safe_read read
+#define safe_read full_read
 #define lstat stat
 
 extern const char *bb_mode_string(mode_t mode);
@@ -138,14 +139,17 @@ extern void (*print_function)(const char *format, ...);
 #define bb_printf(...) do {(print_function != NULL)?print_function(__VA_ARGS__):printf(__VA_ARGS__);} while(0)
 
 #define bb_error_msg bb_printf
-#define bb_error_msg_and_die(...) do {bb_printf(__VA_ARGS__); goto err;} while(0)
+#define bb_error_msg_and_die(...) do {bb_printf(__VA_ARGS__); return;} while(0)
+#define bb_error_msg_and_err(...) do {bb_printf(__VA_ARGS__); goto err;} while(0)
 #define bb_perror_msg bb_error_msg
 #define bb_perror_msg_and_die bb_error_msg_and_die
 #define bb_putchar putchar
 
-#define link(x, y) -1
-#define chown(name, uid, gid)
-
+static inline int link(const char *oldpath, const char *newpath) {errno = ENOSYS; return -1;}
+static inline int symlink(const char *oldpath, const char *newpath) {errno = ENOSYS; return -1;}
+static inline int chown(const char *path, uid_t owner, gid_t group) {errno = ENOSYS; return -1;}
+static inline int mknod(const char *pathname, mode_t mode, dev_t dev) {errno = ENOSYS; return -1;}
+static inline int utimes(const char *filename, const struct timeval times[2]) {errno = ENOSYS; return -1;}
 static inline pid_t wait(int* status) { *status = 4; return -1; }
 #define wait_any_nohang wait
 
@@ -172,7 +176,20 @@ typedef struct _llist_t {
 #if defined(_MSC_VER)
 #define S_IFMT _S_IFMT
 #define S_IFDIR _S_IFDIR
+#define S_IFCHR _S_IFCHR
+#define S_IFIFO _S_IFIFO
 #define S_IFREG _S_IFREG
+#define S_IREAD _S_IREAD
+#define S_IWRITE _S_IWRITE
+#define S_IEXEC _S_IEXEC
+
+#define S_IFLNK  (S_IEXEC + 100)
+#define S_IFSOCK (S_IFLNK + 1)
+#define S_IFBLK  (S_IFSOCK + 1)
+
+#define S_ISLNK(x) FALSE
+#define S_ISDIR(x) ((x) & S_IFDIR)
+#define S_ISREG(x) ((x) & S_IFREG)
 
 #define O_RDONLY _O_RDONLY
 #define O_WRONLY _O_WRONLY

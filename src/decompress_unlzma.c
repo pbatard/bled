@@ -55,8 +55,6 @@ static void rc_read(rc_t *rc)
 		bb_error_msg_and_die("unexpected EOF");
 	rc->buffer_end = RC_BUFFER + buffer_size;
 	rc->ptr = RC_BUFFER;
-err:
-	;
 }
 
 /* Called twice, but one callsite is in speed_inline'd rc_is_bit_1() */
@@ -153,6 +151,7 @@ typedef struct {
 	uint64_t dst_size;
 } PACKED lzma_header_t;
 PRAGMA_END_PACKED
+
 
 /* #defines will force compiler to compute/optimize each one with each usage.
  * Have heart and use enum instead. */

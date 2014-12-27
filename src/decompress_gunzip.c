@@ -919,7 +919,6 @@ static int inflate_block(STATE_PARAM smallint *e)
 	}
 	default:
 		abort_unzip(PASS_STATE_ONLY);
-		return 0;
 	}
 }
 
@@ -1112,7 +1111,6 @@ static int check_header_gzip(STATE_PARAM transformer_state_t *xstate)
 	PRAGMA_BEGIN_PACKED
 	union {
 		unsigned char raw[8];
-		uint8_t bval[8];
 		struct {
 			uint8_t gz_method;
 			uint8_t flags;

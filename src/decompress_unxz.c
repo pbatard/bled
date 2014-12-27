@@ -46,7 +46,7 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_xz_stream(transformer_state_t *xstate
 	 */
 	s = xz_dec_init(XZ_DYNALLOC, 1 << 26);
 	if (!s)
-		bb_error_msg_and_die("memory allocation failed");
+		bb_error_msg_and_err("memory allocation failed");
 
 	// TODO: this is set very low on Windows...
 	in = xmalloc(BUFSIZ);
@@ -63,7 +63,7 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_xz_stream(transformer_state_t *xstate
 		if (b.in_pos == b.in_size) {
 			b.in_size = safe_read(xstate->src_fd, in, BUFSIZ);
 			if ((int)b.in_size < 0)
-				bb_error_msg_and_die(bb_msg_read_error);
+				bb_error_msg_and_err(bb_msg_read_error);
 			b.in_pos = 0;
 		}
 		ret = xz_dec_run(s, &b);
@@ -72,7 +72,7 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_xz_stream(transformer_state_t *xstate
 			nwrote = transformer_write(xstate, b.out, b.out_pos);
 			if (nwrote == (ssize_t)-1) {
 				ret = XZ_DATA_ERROR;
-				bb_error_msg_and_die("write error");
+				bb_error_msg_and_err("write error");
 			}
 			IF_DESKTOP(n += nwrote;)
 			b.out_pos = 0;
@@ -91,7 +91,7 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_xz_stream(transformer_state_t *xstate
 		nwrote = transformer_write(xstate, b.out, b.out_pos);
 		if (nwrote == (ssize_t)-1) {
 			ret = XZ_DATA_ERROR;
-			bb_error_msg_and_die("write error");
+			bb_error_msg_and_err("write error");
 		}
 		IF_DESKTOP(n += nwrote;)
 
@@ -101,24 +101,24 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_xz_stream(transformer_state_t *xstate
 			goto out;
 
 		case XZ_MEM_ERROR:
-			bb_error_msg_and_die("memory allocation failed");
+			bb_error_msg_and_err("memory allocation failed");
 
 		case XZ_MEMLIMIT_ERROR:
-			bb_error_msg_and_die("memory usage limit reached");
+			bb_error_msg_and_err("memory usage limit reached");
 
 		case XZ_FORMAT_ERROR:
-			bb_error_msg_and_die("not a .xz file");
+			bb_error_msg_and_err("not a .xz file");
 
 		case XZ_OPTIONS_ERROR:
-			bb_error_msg_and_die("unsupported options in the .xz headers");
+			bb_error_msg_and_err("unsupported options in the .xz headers");
 
 		case XZ_DATA_ERROR:
-			bb_error_msg_and_die("file is corrupt");
+			bb_error_msg_and_err("file is corrupt");
 		case XZ_BUF_ERROR:
-			bb_error_msg_and_die("buf is corrupt");
+			bb_error_msg_and_err("buf is corrupt");
 
 		default:
-			bb_error_msg_and_die("bug!");
+			bb_error_msg_and_err("bug!");
 		}
 	}
 

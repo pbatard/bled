@@ -14,7 +14,7 @@ void FAST_FUNC init_transformer_state(transformer_state_t *xstate)
 int FAST_FUNC check_signature16(transformer_state_t *xstate, unsigned magic16)
 {
 	if (xstate->check_signature) {
-		uint16_t magic2 = 0;
+		uint16_t magic2;
 		if (full_read(xstate->src_fd, &magic2, 2) != 2 || magic2 != magic16) {
 			bb_error_msg("invalid magic");
 #if 0 /* possible future extension */
@@ -99,7 +99,8 @@ void check_errors_in_children(int signo)
 	}
 }
 
-#if 0
+#if SEAMLESS_COMPRESSION
+
 /* transformer(), more than meets the eye */
 #if BB_MMU
 void FAST_FUNC fork_transformer(int fd,
@@ -155,9 +156,6 @@ void FAST_FUNC fork_transformer(int fd, const char *transform_prog)
 	close(fd_pipe.wr); /* don't want to write to the child */
 	xmove_fd(fd_pipe.rd, fd);
 }
-#endif
-
-#if SEAMLESS_COMPRESSION
 
 /* Used by e.g. rpm which gives us a fd without filename,
  * thus we can't guess the format from filename's extension.

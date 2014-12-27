@@ -10,7 +10,6 @@
 #include "xz_private.h"
 #include "xz_stream.h"
 
-
 /* Hash used to validate the Index field */
 struct xz_dec_hash {
 	vli_type unpadded;
@@ -393,8 +392,10 @@ static enum xz_ret XZ_FUNC dec_stream_header(struct xz_dec *s)
 	if (xz_crc32(s->temp.buf + HEADER_MAGIC_SIZE, 2, 0)
 			!= get_le32(s->temp.buf + HEADER_MAGIC_SIZE + 2))
 		return XZ_DATA_ERROR;
+
 	if (s->temp.buf[HEADER_MAGIC_SIZE] != 0)
 		return XZ_OPTIONS_ERROR;
+
 	/*
 	 * Of integrity checks, we support only none (Check ID = 0) and
 	 * CRC32 (Check ID = 1). However, if XZ_DEC_ANY_CHECK is defined,
@@ -413,6 +414,7 @@ static enum xz_ret XZ_FUNC dec_stream_header(struct xz_dec *s)
 	if (s->check_type > XZ_CHECK_CRC32)
 		return XZ_OPTIONS_ERROR;
 #endif
+
 	return XZ_OK;
 }
 
@@ -578,7 +580,6 @@ static enum xz_ret XZ_FUNC dec_main(struct xz_dec *s, struct xz_buf *b)
 			s->sequence = SEQ_BLOCK_START;
 
 			ret = dec_stream_header(s);
-
 			if (ret != XZ_OK)
 				return ret;
 
@@ -747,6 +748,7 @@ XZ_EXTERN enum xz_ret XZ_FUNC xz_dec_run(struct xz_dec *s, struct xz_buf *b)
 		if (ret == XZ_OK)
 			ret = b->in_pos == b->in_size
 					? XZ_DATA_ERROR : XZ_BUF_ERROR;
+
 		if (ret != XZ_STREAM_END) {
 			b->in_pos = in_start;
 			b->out_pos = out_start;

@@ -48,5 +48,8 @@ int main(int argc, char** argv)
 		printf("%s: %I64d\n", test_files[i].ext, r);
 	}
 
+	printf("Press <ENTER> to exit.");
+	while(getchar() != '\n');
+
 	return 0;
 }
