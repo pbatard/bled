@@ -341,11 +341,6 @@ typedef unsigned smalluint;
 # define bb_setpgrp() setpgrp()
 #endif
 
-/* fdprintf is more readable, we used it before dprintf was standardized */
-//#include <unistd.h>
-#define dprintf(fd, ...) uprintf(__VA_ARGS__)
-#define fdprintf dprintf
-
 /* Useful for defeating gcc's alignment of "char message[]"-like data */
 #if !defined(__s390__)
     /* on s390[x], non-word-aligned data accesses require larger code */
