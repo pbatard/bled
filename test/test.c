@@ -13,7 +13,7 @@
 #endif
 
 #if defined(_MSC_VER)
-#pragma warning(disable: 4996)		// Ignore deprecated
+#pragma warning(disable: 4996)	// Ignore deprecated
 #endif
 
 #include <stdio.h>
@@ -21,12 +21,9 @@
 
 printf_t print_function = NULL;
 
+// It's a unit test, not a sample, so I'll hardcode whatever the hell I want
 #define BASE_PATH "D:\\bled\\test\\data\\"
 #define BASE_FILE "xz"
-
-#ifndef ARRAYSIZE
-#define ARRAYSIZE(A)                (sizeof(A)/sizeof((A)[0]))
-#endif
 
 struct {
 	const char* ext;

@@ -10,15 +10,22 @@
 
 #pragma once
 
+#ifndef ARRAYSIZE
+#define ARRAYSIZE(A)                (sizeof(A)/sizeof((A)[0]))
+#endif
+
 typedef void (*printf_t) (const char* format, ...);
 
-#define BLED_COMPRESSION_ZIP     1	// .zip
-#define BLED_COMPRESSION_7ZIP    2	// .7z
-#define BLED_COMPRESSION_LZW     3	// .Z
-#define BLED_COMPRESSION_GZIP    4	// .gz
-#define BLED_COMPRESSION_LZMA    5	// .lzma
-#define BLED_COMPRESSION_BZIP2   6	// .bz2
-#define BLED_COMPRESSION_XZ      7	// .xz
+enum bled_compression_type {
+	BLED_COMPRESSION_ZIP = 0,	// .zip
+	BLED_COMPRESSION_LZW,		// .Z
+	BLED_COMPRESSION_GZIP,		// .gz
+	BLED_COMPRESSION_LZMA,		// .lzma
+	BLED_COMPRESSION_BZIP2,		// .bz2
+	BLED_COMPRESSION_XZ,		// .xz
+//	BLED_COMPRESSION_7ZIP		// .7z
+	BLED_COMPRESSION_MAX
+};
 
 /* Uncompress file 'src', compressed using 'type', to file 'dst' */
 int64_t bled_uncompress(const char* src, const char* dst, int type);

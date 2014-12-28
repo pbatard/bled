@@ -126,7 +126,7 @@ static unsigned get_bits(bunzip_data *bd, int bits_wanted)
 		/* If we need to read more data from file into byte buffer, do so */
 		if (bd->inbufPos == bd->inbufCount) {
 			/* if "no input fd" case: in_fd == -1, read fails, we jump */
-			bd->inbufCount = read(bd->in_fd, bd->inbuf, IOBUF_SIZE);
+			bd->inbufCount = safe_read(bd->in_fd, bd->inbuf, IOBUF_SIZE);
 			if (bd->inbufCount <= 0)
 				longjmp(bd->jmpbuf, RETVAL_UNEXPECTED_INPUT_EOF);
 			bd->inbufPos = 0;

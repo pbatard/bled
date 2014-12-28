@@ -48,6 +48,7 @@
     <ClInclude Include="..\bb_archive.h" />
     <ClInclude Include="..\bled.h" />
     <ClInclude Include="..\libbb.h" />
+    <ClInclude Include="..\msapi_utf8.h" />
     <ClInclude Include="..\platform.h" />
     <ClInclude Include="..\xz.h" />
     <ClInclude Include="..\xz_config.h" />

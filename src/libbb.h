@@ -26,6 +26,7 @@
 #endif
 
 #include "platform.h"
+#include "msapi_utf8.h"
 
 #include <ctype.h>
 #include <errno.h>
@@ -42,10 +43,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <io.h>
-
-#include <winsock2.h>
-#include <shlwapi.h>
-#include <shlobj.h>
 
 #define IF_DESKTOP(x) x
 #define IF_NOT_DESKTOP(x)
@@ -107,9 +104,6 @@ uint32_t crc32_be(uint32_t crc, unsigned char const *p, size_t len, uint32_t *cr
 #define crc32_block_endian0 crc32_le
 #define crc32_block_endian1 crc32_be
 
-#define bb_msg_read_error "read error"
-#define bb_msg_write_error "write error"
-
 #if defined(_MSC_VER)
 #if _FILE_OFFSET_BITS == 64
 #define stat _stat32i64
@@ -118,23 +112,23 @@ uint32_t crc32_be(uint32_t crc, unsigned char const *p, size_t len, uint32_t *cr
 #define stat _stat32
 #define lseek _lseek
 #endif
-#define read _read
-#define write _write
-#define open _open
-#define close _close
 #endif
 
-#define full_read read
-#define full_write write
-#define safe_read full_read
-#define lstat stat
+typedef struct _llist_t {
+	struct _llist_t *link;
+	char *data;
+} llist_t;
 
-extern const char *bb_mode_string(mode_t mode);
+extern void(*bled_printf)(const char* format, ...);
 
-#define xmalloc malloc
-#define xzalloc(x) calloc(x, 1)
-#define malloc_or_warn malloc
-#define xopen3 open
+#define bb_printf(...) do { if (bled_printf != NULL) bled_printf(__VA_ARGS__); \
+	else { printf(__VA_ARGS__); putchar('\n'); } } while(0)
+#define bb_error_msg bb_printf
+#define bb_error_msg_and_die(...) do {bb_printf(__VA_ARGS__); return;} while(0)
+#define bb_error_msg_and_err(...) do {bb_printf(__VA_ARGS__); goto err;} while(0)
+#define bb_perror_msg bb_error_msg
+#define bb_perror_msg_and_die bb_error_msg_and_die
+#define bb_putchar putchar
 
 static inline void *xrealloc(void *ptr, size_t size) {
 	void *ret = realloc(ptr, size);
@@ -143,49 +137,38 @@ static inline void *xrealloc(void *ptr, size_t size) {
 	return ret;
 }
 
-#define xfunc_die()
-
-#define mkdir(x, y) _mkdir(x)
-
-extern void(*bled_printf)(const char* format, ...);
-#define bb_printf(...) do {(bled_printf != NULL)?bled_printf(__VA_ARGS__):printf(__VA_ARGS__);} while(0)
-
-#define bb_error_msg bb_printf
-#define bb_error_msg_and_die(...) do {bb_printf(__VA_ARGS__); return;} while(0)
-#define bb_error_msg_and_err(...) do {bb_printf(__VA_ARGS__); goto err;} while(0)
-#define bb_perror_msg bb_error_msg
-#define bb_perror_msg_and_die bb_error_msg_and_die
-#define bb_putchar putchar
+#define bb_msg_read_error "read error"
+#define bb_msg_write_error "write error"
+#define bb_mode_string(mode) "[not implemented]"
+#define bb_copyfd_exact_size(fd1, fd2, size) bb_printf("not implemented")
+#define bb_make_directory(path, mode, flags) SHCreateDirectoryExU(NULL, path, NULL)
 
 static inline int link(const char *oldpath, const char *newpath) {errno = ENOSYS; return -1;}
 static inline int symlink(const char *oldpath, const char *newpath) {errno = ENOSYS; return -1;}
 static inline int chown(const char *path, uid_t owner, gid_t group) {errno = ENOSYS; return -1;}
 static inline int mknod(const char *pathname, mode_t mode, dev_t dev) {errno = ENOSYS; return -1;}
 static inline int utimes(const char *filename, const struct timeval times[2]) {errno = ENOSYS; return -1;}
+static inline int fnmatch(const char *pattern, const char *string, int flags) {return PathMatchSpecA(string, pattern)?0:1;}
 static inline pid_t wait(int* status) { *status = 4; return -1; }
 #define wait_any_nohang wait
 
-extern void bb_copyfd_exact_size(int fd1, int fd2, off_t size);
+#define full_read _read
+#define full_write _write
+#define safe_read full_read
+#define lstat stat
+#define xmalloc malloc
+#define xzalloc(x) calloc(x, 1)
+#define malloc_or_warn malloc
+#define xopen3 open
+#define xfunc_die() do { bb_printf("not implemented"); return -1; } while(0)
+#define mkdir(x, y) _mkdirU(x)
 
 #if defined(_MSC_VER)
 static inline struct tm *localtime_r(const time_t *timep, struct tm *result) {
 	result = localtime(timep);
 	return result;
 }
-#endif
 
-static inline int fnmatch(const char *pattern, const char *string, int flags) {
-	return PathMatchSpecA(string, pattern)?0:1;
-}
-
-typedef struct _llist_t {
-	struct _llist_t *link;
-	char *data;
-} llist_t;
-
-#define bb_make_directory(path, mode, flags) SHCreateDirectoryExA(NULL, path, NULL)
-
-#if defined(_MSC_VER)
 #define _S_IFBLK 0x3000
 
 #define S_IFMT   _S_IFMT
