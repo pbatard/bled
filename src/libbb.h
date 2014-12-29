@@ -44,6 +44,11 @@
 #include <sys/types.h>
 #include <io.h>
 
+#ifdef BUFSIZ
+#undef BUFSIZ
+#endif
+#define BUFSIZ 65536
+
 #define IF_DESKTOP(x) x
 #define IF_NOT_DESKTOP(x)
 #define IF_NOT_FEATURE_LZMA_FAST(x) x
@@ -119,7 +124,8 @@ typedef struct _llist_t {
 	char *data;
 } llist_t;
 
-extern void(*bled_printf)(const char* format, ...);
+extern void (*bled_printf) (const char* format, ...);
+extern void (*bled_progress) (const uint64_t processed_bytes);
 
 #define bb_printf(...) do { if (bled_printf != NULL) bled_printf(__VA_ARGS__); \
 	else { printf(__VA_ARGS__); putchar('\n'); } } while(0)
@@ -152,7 +158,18 @@ static inline int fnmatch(const char *pattern, const char *string, int flags) {r
 static inline pid_t wait(int* status) { *status = 4; return -1; }
 #define wait_any_nohang wait
 
-#define full_read _read
+/* This override enables the display of a progress based on the number of bytes read */
+extern uint64_t bb_total_rb;
+static inline ssize_t full_read(int fd, void *buf, size_t count) {
+	ssize_t rb = _read(fd, buf, count);
+	if (rb > 0) {
+		bb_total_rb += rb;
+		if (bled_progress != NULL)
+			bled_progress(bb_total_rb);
+	}
+	return rb;
+}
+
 #define full_write _write
 #define safe_read full_read
 #define lstat stat

@@ -44,7 +44,7 @@ int main(int argc, char** argv)
 	int64_t r;
 	char src[256], dst[256];
 
-	bled_init(NULL);
+	bled_init(NULL, NULL);
 
 	for (i = 0; i<ARRAYSIZE(test_files); i++) {
 		sprintf(src, "%s%s.%s", BASE_PATH, BASE_FILE, test_files[i].ext);

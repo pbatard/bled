@@ -15,13 +15,23 @@
 #include "bb_archive.h"
 #include "bled.h"
 
-smallint bb_got_signal;
-printf_t bled_printf = NULL;
-static bool in_use = 0;
-
 typedef long long int(*unpacker_t)(transformer_state_t *xstate);
 
+/* Globals */
+smallint bb_got_signal;
+uint64_t bb_total_rb;
+printf_t bled_printf = NULL;
+progress_t bled_progress = NULL;
+static bool bled_initialized = 0;
+
+static long long int unpack_none(transformer_state_t *xstate)
+{
+	bb_printf("BLED_COMPRESSION_NONE is not supported");
+	return -1;
+}
+
 unpacker_t unpacker[BLED_COMPRESSION_MAX] = {
+	unpack_none,
 	inflate_unzip,
 	unpack_Z_stream,
 	unpack_gz_stream,
@@ -36,6 +46,10 @@ int64_t bled_uncompress(const char* src, const char* dst, int type)
 	transformer_state_t xstate;
 	int64_t ret;
 
+	if (!bled_initialized)
+		return -1;
+
+	bb_total_rb = 0;
 	init_transformer_state(&xstate);
 	xstate.src_fd = -1;
 	xstate.dst_fd = -1;
@@ -71,19 +85,55 @@ err:
 	return -1;
 }
 
-int bled_init(printf_t print_function)
+/* Uncompress using Windows handles */
+int64_t bled_uncompress_with_handles(HANDLE hSrc, HANDLE hDst, int type)
 {
-	if (in_use)
+	transformer_state_t xstate;
+
+	if (!bled_initialized)
 		return -1;
-	in_use = true;
+
+	bb_total_rb = 0;
+	init_transformer_state(&xstate);
+	xstate.src_fd = -1;
+	xstate.dst_fd = -1;
+	xstate.check_signature = 1;
+
+	xstate.src_fd = _open_osfhandle((intptr_t)hSrc, _O_RDONLY);
+	if (xstate.src_fd < 0) {
+		bb_printf("Could not get source descriptor (errno: %d)", errno);
+		return -1;
+	}
+
+	xstate.dst_fd = _open_osfhandle((intptr_t)hDst, 0);
+	if (xstate.dst_fd < 0) {
+		bb_printf("Could not get target descriptor (errno: %d)", errno);
+		return -1;
+	}
+
+	if ((type < 0) || (type >= BLED_COMPRESSION_MAX)) {
+		bb_printf("unsupported compression format");
+		return -1;
+	}
+
+	return unpacker[type](&xstate);
+}
+
+int bled_init(printf_t print_function, progress_t progress_function)
+{
+	if (bled_initialized)
+		return -1;
+	bled_initialized = true;
 	bled_printf = print_function;
+	bled_progress = progress_function;
 	return 0;
 }
 
 void bled_exit(void)
 {
 	bled_printf = NULL;
+	bled_progress = NULL;
 	if (global_crc32_table)
 		free(global_crc32_table);
-	in_use = false;
+	bled_initialized = false;
 }
