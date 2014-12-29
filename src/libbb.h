@@ -23,6 +23,14 @@
 #if defined(_MSC_VER)
 #pragma warning(disable: 4715)		// not all control paths return a value
 #pragma warning(disable: 4996)		// Ignore deprecated
+#if defined(DDKBUILD)
+#pragma warning(disable: 4242)		// "Conversion from x to y, possible loss of data"
+#pragma warning(disable: 4244)
+struct timeval {
+	long tv_sec;
+	long tv_usec;
+};
+#endif
 #endif
 
 #include "platform.h"
