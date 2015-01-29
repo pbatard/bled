@@ -3,7 +3,7 @@
  * Compensating for what Microsoft should have done a long long time ago.
  * Also see http://utf8everywhere.org/
  *
- * Copyright © 2010-2014 Pete Batard <pete@akeo.ie>
+ * Copyright © 2010-2015 Pete Batard <pete@akeo.ie>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -427,7 +427,7 @@ static __inline DWORD GetTempFileNameU(char* lpPathName, char* lpPrefixString, U
 	wconvert(lpPathName);
 	wconvert(lpPrefixString);
 	walloc(lpTempFileName, MAX_PATH);
-	ret =GetTempFileNameW(wlpPathName, wlpPrefixString, uUnique, wlpTempFileName);
+	ret = GetTempFileNameW(wlpPathName, wlpPrefixString, uUnique, wlpTempFileName);
 	err = GetLastError();
 	if ((ret != 0) && ((ret = wchar_to_utf8_no_alloc(wlpTempFileName, lpTempFileName, MAX_PATH)) == 0)) {
 		err = GetLastError();
@@ -496,6 +496,21 @@ static __inline int SHCreateDirectoryExU(HWND hwnd, const char* pszPath, SECURIT
 	err = GetLastError();
 	wfree(pszPath);
 	SetLastError(err);
+	return ret;
+}
+
+static __inline int SHDeleteDirectoryExU(HWND hwnd, const char* pszPath, FILEOP_FLAGS fFlags)
+{
+	int ret;
+	// String needs to be double NULL terminated, so we just use the length of the UTF-8 string
+	// which is always expected to be larger than our UTF-16 one, and add 2 chars for good measure.
+	size_t wpszPath_len = strlen(pszPath) + 2;
+	wchar_t* wpszPath = (wchar_t*)calloc(wpszPath_len, sizeof(wchar_t));
+	SHFILEOPSTRUCTW shfo = { hwnd, FO_DELETE, wpszPath, NULL, fFlags, FALSE, NULL, NULL };
+	utf8_to_wchar_no_alloc(pszPath, wpszPath, (int)wpszPath_len);
+	// FOF_SILENT | FOF_NOERRORUI | FOF_NOCONFIRMATION,
+	ret = SHFileOperationW(&shfo);
+	wfree(pszPath);
 	return ret;
 }
 

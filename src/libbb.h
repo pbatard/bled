@@ -171,20 +171,25 @@ static inline pid_t wait(int* status) { *status = 4; return -1; }
 
 /* This override enables the display of a progress based on the number of bytes read */
 extern uint64_t bb_total_rb;
-static inline ssize_t full_read(int fd, void *buf, size_t count) {
-	ssize_t rb;
+static inline int full_read(int fd, void *buf, size_t count) {
+	int rb;
 	if ((bled_cancel_request != NULL) && (*bled_cancel_request != 0)) {
 		errno = EINTR;
 		return -1;
 	}
 
-	rb = _read(fd, buf, count);
+	rb = _read(fd, buf, (int)count);
 	if (rb > 0) {
 		bb_total_rb += rb;
 		if (bled_progress != NULL)
 			bled_progress(bb_total_rb);
 	}
 	return rb;
+}
+
+static inline struct tm *localtime_r(const time_t *timep, struct tm *result) {
+	result = localtime(timep);
+	return result;
 }
 
 #define full_write _write
@@ -197,11 +202,6 @@ static inline ssize_t full_read(int fd, void *buf, size_t count) {
 #define mkdir(x, y) _mkdirU(x)
 
 #if defined(_MSC_VER)
-static inline struct tm *localtime_r(const time_t *timep, struct tm *result) {
-	result = localtime(timep);
-	return result;
-}
-
 #define _S_IFBLK 0x3000
 
 #define S_IFMT   _S_IFMT
