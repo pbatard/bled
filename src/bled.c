@@ -193,7 +193,9 @@ void bled_exit(void)
 	bled_printf = NULL;
 	bled_progress = NULL;
 	bled_cancel_request = NULL;
-	if (global_crc32_table)
+	if (global_crc32_table) {
 		free(global_crc32_table);
+		global_crc32_table = NULL;
+	}
 	bled_initialized = false;
 }
