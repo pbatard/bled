@@ -29,8 +29,8 @@ struct {
 	const char* ext;
 	int type;
 } test_files[] = {
-//	{ "zip", BLED_COMPRESSION_ZIP},	// Not working
-//	{ "7z", BLED_COMPRESSION_7ZIP},	// No implemented
+//	{ "zip", BLED_COMPRESSION_ZIP},	// Not implemented
+//	{ "7z", BLED_COMPRESSION_7ZIP},	// Not implemented
 	{ "Z", BLED_COMPRESSION_LZW},
 	{ "gz", BLED_COMPRESSION_GZIP},
 	{ "lzma", BLED_COMPRESSION_LZMA},
@@ -38,25 +38,43 @@ struct {
 	{ "xz", BLED_COMPRESSION_XZ},
 };
 
+// With a 9044 size, the last word in the buffer should resolve to "ready" on success
+#define BUFSIZE 9044
 int main(int argc, char** argv)
 {
 	int i;
 	int64_t r;
-	char src[256], dst[256];
+	char src[256], dst[256], *buffer = NULL;
 
 	bled_init(NULL, NULL, NULL);
 
+	printf("DECOMPRESS TO BUFFER:\n");
+	buffer = malloc(BUFSIZE);
+	for (i = 0; i<ARRAYSIZE(test_files); i++) {
+		sprintf(src, "%s%s.%s", BASE_PATH, BASE_FILE, test_files[i].ext);
+		r = bled_uncompress_to_buffer(src, buffer, BUFSIZE, test_files[i].type);
+		buffer[BUFSIZE-1] = 0;
+		printf("  %s:\t%I64d - \"%s\"\n", test_files[i].ext, r, &buffer[BUFSIZE-6]);
+		if (r < 0)
+			goto out;
+	}
+
+	printf("\nDECOMPRESS TO FILE:\n");
 	for (i = 0; i<ARRAYSIZE(test_files); i++) {
 		sprintf(src, "%s%s.%s", BASE_PATH, BASE_FILE, test_files[i].ext);
 		sprintf(dst, "%s!%s.txt", BASE_PATH, test_files[i].ext);
 		r = bled_uncompress(src, dst, test_files[i].type);
-		printf("%s: %I64d\n", test_files[i].ext, r);
+		printf("  %s:\t%I64d\n", test_files[i].ext, r);
+		if (r < 0)
+			goto out;
 	}
 
+out:
+	free(buffer);
 	bled_exit();
 
 #if defined(_MSC_VER) && defined(_DEBUG)
-	printf("Press <ENTER> to exit.\n");
+	printf("\nPress <ENTER> to exit.\n");
 	while(getchar() != '\n');
 #endif
 

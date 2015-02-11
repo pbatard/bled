@@ -55,13 +55,9 @@ Not planning to add support for RAR archives for the time being.
   * The original `libbb.h` was GPLv2 __only__, so I had to recreate my own from scratch
     that is GPLv2 __or later__. This was a bit of a pain, so I'm not gonna bother
     recreating a GPLv2+ libbb.h for Linux or other platforms.
-* Only uncompressing to file is supported. I may add uncompression to a buffer, but that
-  will depend on whether I need that feature in Rufus or not.
 * Can't query the uncompressed size for now. I may add that if needed.
-* .zip and .7z archive extraction to a directory is not currently supported. But I'll
-   probably need that eventually, so I'm planning to add it then. .zip archive support
-   shouldn't be much of problem, since BusyBox already had it. .7z will be a different
-   story, as it looks like this will need to be created from scratch.
+* .zip and .7z archive extraction is not currently supported, but I may need that
+   eventually, so I may add it then.
 * No multithreading.
 * There probably exist limitations with regards to some of the advanced compression
   features that can be added to an archive and/or newer compression formats
