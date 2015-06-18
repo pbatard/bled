@@ -29,13 +29,13 @@ struct {
 	const char* ext;
 	int type;
 } test_files[] = {
-//	{ "zip", BLED_COMPRESSION_ZIP},	// Not implemented
-//	{ "7z", BLED_COMPRESSION_7ZIP},	// Not implemented
+	{ "zip", BLED_COMPRESSION_ZIP},
 	{ "Z", BLED_COMPRESSION_LZW},
 	{ "gz", BLED_COMPRESSION_GZIP},
 	{ "lzma", BLED_COMPRESSION_LZMA},
 	{ "bz2", BLED_COMPRESSION_BZIP2},
 	{ "xz", BLED_COMPRESSION_XZ},
+//	{ "7z", BLED_COMPRESSION_7ZIP},	// Not implemented
 };
 
 // With a 9044 size, the last word in the buffer should resolve to "ready" on success

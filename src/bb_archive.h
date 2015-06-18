@@ -230,6 +230,7 @@ ssize_t xtransformer_write(transformer_state_t *xstate, const void *buf, size_t 
 int check_signature16(transformer_state_t *xstate, unsigned magic16) FAST_FUNC;
 
 IF_DESKTOP(long long) int inflate_unzip(transformer_state_t *xstate) FAST_FUNC;
+IF_DESKTOP(long long) int unpack_zip_stream(transformer_state_t *xstate) FAST_FUNC;
 IF_DESKTOP(long long) int unpack_Z_stream(transformer_state_t *xstate) FAST_FUNC;
 IF_DESKTOP(long long) int unpack_gz_stream(transformer_state_t *xstate) FAST_FUNC;
 IF_DESKTOP(long long) int unpack_bz2_stream(transformer_state_t *xstate) FAST_FUNC;

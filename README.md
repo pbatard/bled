@@ -8,7 +8,7 @@ This is _Bled_, the <b>B</b>usyBox <b>L</b>ibrary for <b>E</b>asy <b>D</b>ecompr
 ## What's it for?
 
 It's a library, that can be used in applications to handle the decompression of
-__.Z__, __.gz__, __.bz2__, __.lzma__, __.xz__, __.zip__ (_planned_) and __.7z__ (_planned_)
+__.Z__, __.gz__, __.bz2__, __.lzma__, __.xz__, __.zip__ and (_planned_) __.7z__ 
 compressed files and/or archives.
 
 ## Why are you doing that?
@@ -32,35 +32,35 @@ GPLv2 __or later__.
 
 While the BusyBox project as a whole is GPLv2 __only__, this library is GPLv2
 __or later__, which means it can be used indiscriminately in GPLv2 or GPLv3 projects.
-That's because the BusyBox sources we have used are all explictly tagged GPLv2 or later
-and the ones we needed that weren't (`libbb.h`, `crc32.c`, `decompress_unxz.c`) have all
-been replaced with versions that are. Also, since we're not using any part of bzlib
-there's no additional license notices required. So this really is a _pure_ GPLv2
-__or later__ decompression library for the most common compression formats.
+This is possible because the BusyBox sources we used were all explictly tagged GPLv2 or
+later and any source that wasn't (`libbb.h`, `crc32.c`, `decompress_unxz.c`) has been
+recreated/replaced with versions that are. Also, since we're not using any part of bzlib
+there's no additional license notice required. So this really is a _pure_ GPLv2
+__or later__ decompression library, for the most common compression formats.
 
 ## What about compressed tar archives?
 
 I'm not planning to handle these, because I have no need for tar extraction in Rufus.
-However, since tar archive handling is present in the BusyBox sources, I'll gladly accept
-a patch if you feel like adding support for it.
+However, since tar archive handling is present in the BusyBox sources, I may accept a
+patch if you feel like adding support for it.
 
-## What about rar?
+## What about .rar?
 
-Not planning to add support for RAR archives for the time being.
+Not planning to add support for RAR, unless a truly Free Source (GPL) RAR decompression
+comes along.
 
 ## Are there any limitations?
 
 * Only Windows is supported for now (MinGW/gcc and MSVC). That's because:
   * Windows is the only platform I need for Rufus
   * The original `libbb.h` was GPLv2 __only__, so I had to recreate my own from scratch
-    that is GPLv2 __or later__. This was a bit of a pain, so I'm not gonna bother
+    that is GPLv2 __or later__. This was a bit of a pain, so I'm don't want to bother
     recreating a GPLv2+ libbb.h for Linux or other platforms.
-* Can't query the uncompressed size for now. I may add that if needed.
-* .zip and .7z archive extraction is not currently supported, but I may need that
-   eventually, so I may add it then.
-* No multithreading.
-* There probably exist limitations with regards to some of the advanced compression
-  features that can be added to an archive and/or newer compression formats
+* Can't query the uncompressed file size. But I may add this feature if needed.
+* .7z archive extraction is not currently supported. But I may add this feature if needed.
+* No multithreading and not optimized for speed __at all__!
+* There probably exist limitations with regards to advanced compression and/or newer
+  compression formats.
 
 ## Alright I'm sold. What do I need?
 
