@@ -318,15 +318,15 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_zip_stream(transformer_state_t *xstat
 		/* Method 8 - inflate */
 		xstate->bytes_in = zip_header.formatted.cmpsize;
 		n = inflate_unzip(xstate);
-		if ((n < 0) && (n != -ENOSPC))
+
+		/* Validate decompression */
+		if (n >= 0) {
+			if (zip_header.formatted.ucmpsize != xstate->bytes_out)
+				bb_error_msg_and_err("bad length");
+			else if (zip_header.formatted.crc32 != (xstate->crc32 ^ 0xffffffffL))
+				bb_error_msg_and_err("crc error");
+		} else if (n != -ENOSPC) {
 			bb_error_msg_and_err("inflate error");
-		/* Validate decompression - crc */
-		if (zip_header.formatted.crc32 != (xstate->crc32 ^ 0xffffffffL)) {
-			bb_error_msg_and_err("crc error");
-		}
-		/* Validate decompression - size */
-		if ((n > 0) && (zip_header.formatted.ucmpsize != xstate->bytes_out)) {
-			bb_error_msg_and_err("bad length");
 		}
 	}
 
