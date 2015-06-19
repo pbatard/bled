@@ -229,6 +229,12 @@ static uint32_t read_next_cdf(uint32_t cdf_offset, cdf_header_t *cdf_ptr)
 };
 #endif
 
+static void unzip_skip(int zip_fd, off_t skip)
+{
+	if (skip != 0)
+		if (lseek(zip_fd, skip, SEEK_CUR) == (off_t)-1)
+			bb_copyfd_exact_size(zip_fd, -1, skip);
+}
 
 IF_DESKTOP(long long) int FAST_FUNC unpack_zip_stream(transformer_state_t *xstate)
 {
@@ -250,7 +256,7 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_zip_stream(transformer_state_t *xstat
 		/* Data descriptor? It was a streaming file, go on */
 		if (magic == ZIP_DD_MAGIC) {
 			/* skip over duplicate crc32, cmpsize and ucmpsize */
-			unzip_skip(3 * 4);
+			unzip_skip(xstate->src_fd, 3 * 4);
 			continue;
 		}
 #endif
@@ -305,6 +311,9 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_zip_stream(transformer_state_t *xstat
 		safe_read(xstate->src_fd, filename, zip_header.formatted.filename_len);
 		bb_printf("processing archive file '%s'", filename);
 		free(filename);
+
+		/* Skip extra header bytes */
+		unzip_skip(xstate->src_fd, zip_header.formatted.extra_len);
 
 		/* Method 8 - inflate */
 		xstate->bytes_in = zip_header.formatted.cmpsize;
