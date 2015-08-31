@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bled", "src\.msvc\bled.vcxp
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\.msvc\test.vcxproj", "{5D64AF41-BDCF-4382-A6BD-8C08AA0FAA93}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "uncompress", "test\.msvc\uncompress.vcxproj", "{375A62EC-4108-4CFF-9CC7-7C49C3D7E2A2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86_32 = Debug|x86_32
@@ -31,6 +33,14 @@ Global
 		{5D64AF41-BDCF-4382-A6BD-8C08AA0FAA93}.Release|x86_32.Build.0 = Release|Win32
 		{5D64AF41-BDCF-4382-A6BD-8C08AA0FAA93}.Release|x86_64.ActiveCfg = Release|x64
 		{5D64AF41-BDCF-4382-A6BD-8C08AA0FAA93}.Release|x86_64.Build.0 = Release|x64
+		{375A62EC-4108-4CFF-9CC7-7C49C3D7E2A2}.Debug|x86_32.ActiveCfg = Debug|Win32
+		{375A62EC-4108-4CFF-9CC7-7C49C3D7E2A2}.Debug|x86_32.Build.0 = Debug|Win32
+		{375A62EC-4108-4CFF-9CC7-7C49C3D7E2A2}.Debug|x86_64.ActiveCfg = Debug|x64
+		{375A62EC-4108-4CFF-9CC7-7C49C3D7E2A2}.Debug|x86_64.Build.0 = Debug|x64
+		{375A62EC-4108-4CFF-9CC7-7C49C3D7E2A2}.Release|x86_32.ActiveCfg = Release|Win32
+		{375A62EC-4108-4CFF-9CC7-7C49C3D7E2A2}.Release|x86_32.Build.0 = Release|Win32
+		{375A62EC-4108-4CFF-9CC7-7C49C3D7E2A2}.Release|x86_64.ActiveCfg = Release|x64
+		{375A62EC-4108-4CFF-9CC7-7C49C3D7E2A2}.Release|x86_64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

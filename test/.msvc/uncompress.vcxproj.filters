@@ -7,7 +7,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\test.c">
+    <ClCompile Include="..\uncompress.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

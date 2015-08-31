@@ -76,7 +76,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-noinst_PROGRAMS = test$(EXEEXT)
+noinst_PROGRAMS = test$(EXEEXT) uncompress$(EXEEXT)
 subdir = test
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -92,6 +92,11 @@ test_OBJECTS = $(am_test_OBJECTS)
 test_DEPENDENCIES = ../src/libbled.a
 test_LINK = $(CCLD) $(test_CFLAGS) $(CFLAGS) $(test_LDFLAGS) \
 	$(LDFLAGS) -o $@
+am_uncompress_OBJECTS = uncompress-uncompress.$(OBJEXT)
+uncompress_OBJECTS = $(am_uncompress_OBJECTS)
+uncompress_DEPENDENCIES = ../src/libbled.a
+uncompress_LINK = $(CCLD) $(uncompress_CFLAGS) $(CFLAGS) \
+	$(uncompress_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -123,7 +128,7 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(test_SOURCES)
+SOURCES = $(test_SOURCES) $(uncompress_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -239,6 +244,10 @@ test_SOURCES = test.c
 test_CFLAGS = $(AM_CFLAGS)
 test_LDFLAGS = $(AM_LDFLAGS)
 test_LDADD = ../src/libbled.a
+uncompress_SOURCES = uncompress.c
+uncompress_CFLAGS = $(AM_CFLAGS)
+uncompress_LDFLAGS = $(AM_LDFLAGS)
+uncompress_LDADD = ../src/libbled.a
 all: all-am
 
 .SUFFIXES:
@@ -281,6 +290,10 @@ test$(EXEEXT): $(test_OBJECTS) $(test_DEPENDENCIES) $(EXTRA_test_DEPENDENCIES)
 	@rm -f test$(EXEEXT)
 	$(AM_V_CCLD)$(test_LINK) $(test_OBJECTS) $(test_LDADD) $(LIBS)
 
+uncompress$(EXEEXT): $(uncompress_OBJECTS) $(uncompress_DEPENDENCIES) $(EXTRA_uncompress_DEPENDENCIES) 
+	@rm -f uncompress$(EXEEXT)
+	$(AM_V_CCLD)$(uncompress_LINK) $(uncompress_OBJECTS) $(uncompress_LDADD) $(LIBS)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -298,6 +311,12 @@ test-test.o: test.c
 
 test-test.obj: test.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_CFLAGS) $(CFLAGS) -c -o test-test.obj `if test -f 'test.c'; then $(CYGPATH_W) 'test.c'; else $(CYGPATH_W) '$(srcdir)/test.c'; fi`
+
+uncompress-uncompress.o: uncompress.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(uncompress_CFLAGS) $(CFLAGS) -c -o uncompress-uncompress.o `test -f 'uncompress.c' || echo '$(srcdir)/'`uncompress.c
+
+uncompress-uncompress.obj: uncompress.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(uncompress_CFLAGS) $(CFLAGS) -c -o uncompress-uncompress.obj `if test -f 'uncompress.c'; then $(CYGPATH_W) 'uncompress.c'; else $(CYGPATH_W) '$(srcdir)/uncompress.c'; fi`
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
