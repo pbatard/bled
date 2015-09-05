@@ -1,5 +1,5 @@
 /*
- * Bled (Busybox Library for Easy Decompression) - simple uncompress app
+ * Bled (Base Library for Easy Decompression) - simple uncompress app
  *
  * Copyright © 2015 Pete Batard <pete@akeo.ie>
  *

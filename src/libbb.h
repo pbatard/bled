@@ -1,7 +1,7 @@
 /*
  * Library header for busybox
  *
- * Rewritten for Bled (Busybox Library for Easy Decompression)
+ * Rewritten for Bled (Base Library for Easy Decompression)
  * Copyright © 2014-2015 Pete Batard <pete@akeo.ie>
  *
  * Licensed under GPLv2 or later, see file LICENSE in this source tree.

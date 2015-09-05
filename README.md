@@ -1,9 +1,10 @@
-Bled - BusyBox Library for Easy Decompression
+Bled - Base Library for Easy Decompression
 =============================================
 
 ## What's this then?
 
-This is _Bled_, the <b>B</b>usyBox <b>L</b>ibrary for <b>E</b>asy <b>D</b>ecompression.
+This is _Bled_, the <b>B</b>ase <b>L</b>ibrary for <b>E</b>asy <b>D</b>ecompression. It
+is based almost entirely on the native decompression code found in [BusyBox](http://www.busybox.net/).
 
 ## What's it for?
 
@@ -56,7 +57,9 @@ comes along.
   * The original `libbb.h` was GPLv2 __only__, so I had to recreate my own from scratch
     that is GPLv2 __or later__. This was a bit of a pain, so I'm don't want to bother
     recreating a GPLv2+ libbb.h for Linux or other platforms.
-* Can't query the uncompressed file size. But I may add this feature if needed.
+* Can't query the uncompressed file size. This is mostly due to the limitation of the
+  compression formats being used, as most of them are stream formats and do not store
+  that information anywhere.
 * .7z archive extraction is not currently supported. But I may add this feature if needed.
 * No multithreading and not optimized for speed __at all__!
 * There probably exist limitations with regards to advanced compression and/or newer
