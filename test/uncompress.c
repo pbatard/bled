@@ -14,6 +14,7 @@
 
 #if defined(_MSC_VER)
 #pragma warning(disable: 4996)	// Ignore deprecated
+#pragma warning(disable: 28159)	// Code analysis warning for GetTickCount vs GetTickCount64
 #endif
 
 #include <stdio.h>

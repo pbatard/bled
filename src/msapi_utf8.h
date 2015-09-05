@@ -28,6 +28,8 @@
 #include <shlwapi.h>
 #include <setupapi.h>
 #include <direct.h>
+#include <share.h>
+#include <fcntl.h>
 #include <io.h>
 
 #pragma once
@@ -203,6 +205,18 @@ static __inline int MessageBoxU(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT
 	err = GetLastError();
 	wfree(lpText);
 	wfree(lpCaption);
+	SetLastError(err);
+	return ret;
+}
+
+static __inline int DrawTextU(HDC hDC, LPCSTR lpText, int nCount, LPRECT lpRect, UINT uFormat)
+{
+	int ret;
+	DWORD err = ERROR_INVALID_DATA;
+	wconvert(lpText);
+	ret = DrawTextW(hDC, wlpText, nCount, lpRect, uFormat);
+	err = GetLastError();
+	wfree(lpText);
 	SetLastError(err);
 	return ret;
 }
@@ -400,6 +414,34 @@ static __inline DWORD GetCurrentDirectoryU(DWORD nBufferLength, char* lpBuffer)
 	ret = GetCurrentDirectoryW(nBufferLength, wlpBuffer);
 	err = GetLastError();
 	if ((ret != 0) && ((ret = wchar_to_utf8_no_alloc(wlpBuffer, lpBuffer, nBufferLength)) == 0)) {
+		err = GetLastError();
+	}
+	wfree(lpBuffer);
+	SetLastError(err);
+	return ret;
+}
+
+static __inline UINT GetSystemDirectoryU(char* lpBuffer, UINT uSize)
+{
+	UINT ret = 0, err = ERROR_INVALID_DATA;
+	walloc(lpBuffer, uSize);
+	ret = GetSystemDirectoryW(wlpBuffer, uSize);
+	err = GetLastError();
+	if ((ret != 0) && ((ret = wchar_to_utf8_no_alloc(wlpBuffer, lpBuffer, uSize)) == 0)) {
+		err = GetLastError();
+	}
+	wfree(lpBuffer);
+	SetLastError(err);
+	return ret;
+}
+
+static __inline UINT GetSystemWindowsDirectoryU(char* lpBuffer, UINT uSize)
+{
+	UINT ret = 0, err = ERROR_INVALID_DATA;
+	walloc(lpBuffer, uSize);
+	ret = GetSystemWindowsDirectoryW(wlpBuffer, uSize);
+	err = GetLastError();
+	if ((ret != 0) && ((ret = wchar_to_utf8_no_alloc(wlpBuffer, lpBuffer, uSize)) == 0)) {
 		err = GetLastError();
 	}
 	wfree(lpBuffer);
@@ -731,7 +773,7 @@ static __inline FILE* fopenU(const char* filename, const char* mode)
 	FILE* ret = NULL;
 	wconvert(filename);
 	wconvert(mode);
-	ret = _wfopen(wfilename, wmode);
+	_wfopen_s(&ret, wfilename, wmode);
 	wfree(filename);
 	wfree(mode);
 	return ret;
@@ -740,8 +782,14 @@ static __inline FILE* fopenU(const char* filename, const char* mode)
 static __inline int _openU(const char *filename, int oflag , int pmode)
 {
 	int ret = -1;
+	int shflag = _SH_DENYNO;
 	wconvert(filename);
-	ret = _wopen(wfilename, oflag, pmode);
+	// Try to match the share flag to the oflag
+	if (oflag & _O_RDONLY)
+		shflag = _SH_DENYWR;
+	else if (oflag & _O_WRONLY)
+		shflag = _SH_DENYRD;
+	_wsopen_s(&ret, wfilename, oflag, shflag, pmode);
 	wfree(filename);
 	return ret;
 }
@@ -750,8 +798,12 @@ static __inline int _openU(const char *filename, int oflag , int pmode)
 static __inline char* getenvU(const char* varname)
 {
 	wconvert(varname);
-	char* ret;
-	ret = wchar_to_utf8(_wgetenv(wvarname));
+	char *ret;
+	wchar_t value[256];
+	size_t value_size;
+	// MinGW and WDK don't know wdupenv_s, so we use wgetenv_s
+	_wgetenv_s(&value_size, value, ARRAYSIZE(value), wvarname);
+	ret = wchar_to_utf8(value);
 	wfree(varname);
 	return ret;
 }

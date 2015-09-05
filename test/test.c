@@ -12,10 +12,6 @@
 #include <crtdbg.h>
 #endif
 
-#if defined(_MSC_VER)
-#pragma warning(disable: 4996)	// Ignore deprecated
-#endif
-
 #include <stdio.h>
 #include "../src/bled.h"
 
@@ -51,7 +47,7 @@ int main(int argc, char** argv)
 	printf("DECOMPRESS TO BUFFER:\n");
 	buffer = malloc(BUFSIZE);
 	for (i = 0; i<ARRAYSIZE(test_files); i++) {
-		sprintf(src, "%s%s.%s", BASE_PATH, BASE_FILE, test_files[i].ext);
+		sprintf_s(src, sizeof(src), "%s%s.%s", BASE_PATH, BASE_FILE, test_files[i].ext);
 		r = bled_uncompress_to_buffer(src, buffer, BUFSIZE, test_files[i].type);
 		buffer[BUFSIZE-1] = 0;
 		printf("  %s:\t%I64d - \"%s\"\n", test_files[i].ext, r, &buffer[BUFSIZE-6]);
@@ -61,8 +57,8 @@ int main(int argc, char** argv)
 
 	printf("\nDECOMPRESS TO FILE:\n");
 	for (i = 0; i<ARRAYSIZE(test_files); i++) {
-		sprintf(src, "%s%s.%s", BASE_PATH, BASE_FILE, test_files[i].ext);
-		sprintf(dst, "%s!%s.txt", BASE_PATH, test_files[i].ext);
+		sprintf_s(src, sizeof(src), "%s%s.%s", BASE_PATH, BASE_FILE, test_files[i].ext);
+		sprintf_s(dst, sizeof(dst), "%s!%s.txt", BASE_PATH, test_files[i].ext);
 		r = bled_uncompress(src, dst, test_files[i].type);
 		printf("  %s:\t%I64d\n", test_files[i].ext, r);
 		if (r < 0)
