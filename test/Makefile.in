@@ -76,7 +76,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-noinst_PROGRAMS = test$(EXEEXT) uncompress$(EXEEXT)
+noinst_PROGRAMS = cmp$(EXEEXT) test$(EXEEXT) uncompress$(EXEEXT)
 subdir = test
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -87,6 +87,11 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
+am_cmp_OBJECTS = cmp-cmp.$(OBJEXT)
+cmp_OBJECTS = $(am_cmp_OBJECTS)
+cmp_DEPENDENCIES = ../src/libbled.a
+cmp_LINK = $(CCLD) $(cmp_CFLAGS) $(CFLAGS) $(cmp_LDFLAGS) $(LDFLAGS) \
+	-o $@
 am_test_OBJECTS = test-test.$(OBJEXT)
 test_OBJECTS = $(am_test_OBJECTS)
 test_DEPENDENCIES = ../src/libbled.a
@@ -128,7 +133,7 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(test_SOURCES) $(uncompress_SOURCES)
+SOURCES = $(cmp_SOURCES) $(test_SOURCES) $(uncompress_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -240,6 +245,10 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+cmp_SOURCES = cmp.c
+cmp_CFLAGS = $(AM_CFLAGS)
+cmp_LDFLAGS = $(AM_LDFLAGS)
+cmp_LDADD = ../src/libbled.a
 test_SOURCES = test.c
 test_CFLAGS = $(AM_CFLAGS)
 test_LDFLAGS = $(AM_LDFLAGS)
@@ -286,6 +295,10 @@ $(am__aclocal_m4_deps):
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
 
+cmp$(EXEEXT): $(cmp_OBJECTS) $(cmp_DEPENDENCIES) $(EXTRA_cmp_DEPENDENCIES) 
+	@rm -f cmp$(EXEEXT)
+	$(AM_V_CCLD)$(cmp_LINK) $(cmp_OBJECTS) $(cmp_LDADD) $(LIBS)
+
 test$(EXEEXT): $(test_OBJECTS) $(test_DEPENDENCIES) $(EXTRA_test_DEPENDENCIES) 
 	@rm -f test$(EXEEXT)
 	$(AM_V_CCLD)$(test_LINK) $(test_OBJECTS) $(test_LDADD) $(LIBS)
@@ -305,6 +318,12 @@ distclean-compile:
 
 .c.obj:
 	$(AM_V_CC)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+cmp-cmp.o: cmp.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cmp_CFLAGS) $(CFLAGS) -c -o cmp-cmp.o `test -f 'cmp.c' || echo '$(srcdir)/'`cmp.c
+
+cmp-cmp.obj: cmp.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cmp_CFLAGS) $(CFLAGS) -c -o cmp-cmp.obj `if test -f 'cmp.c'; then $(CYGPATH_W) 'cmp.c'; else $(CYGPATH_W) '$(srcdir)/cmp.c'; fi`
 
 test-test.o: test.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_CFLAGS) $(CFLAGS) -c -o test-test.o `test -f 'test.c' || echo '$(srcdir)/'`test.c

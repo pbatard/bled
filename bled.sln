@@ -5,6 +5,8 @@ VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bled", "src\.msvc\bled.vcxproj", "{FB6D52D4-A2F8-C358-DB85-BBCAECFDDD7D}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cmp", "test\.msvc\cmp.vcxproj", "{8F5C5B08-807F-41A1-93D1-76439E8E1328}"
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\.msvc\test.vcxproj", "{5D64AF41-BDCF-4382-A6BD-8C08AA0FAA93}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "uncompress", "test\.msvc\uncompress.vcxproj", "{375A62EC-4108-4CFF-9CC7-7C49C3D7E2A2}"
@@ -41,6 +43,14 @@ Global
 		{375A62EC-4108-4CFF-9CC7-7C49C3D7E2A2}.Release|x86_32.Build.0 = Release|Win32
 		{375A62EC-4108-4CFF-9CC7-7C49C3D7E2A2}.Release|x86_64.ActiveCfg = Release|x64
 		{375A62EC-4108-4CFF-9CC7-7C49C3D7E2A2}.Release|x86_64.Build.0 = Release|x64
+		{8F5C5B08-807F-41A1-93D1-76439E8E1328}.Debug|x86_32.ActiveCfg = Debug|Win32
+		{8F5C5B08-807F-41A1-93D1-76439E8E1328}.Debug|x86_32.Build.0 = Debug|Win32
+		{8F5C5B08-807F-41A1-93D1-76439E8E1328}.Debug|x86_64.ActiveCfg = Debug|x64
+		{8F5C5B08-807F-41A1-93D1-76439E8E1328}.Debug|x86_64.Build.0 = Debug|x64
+		{8F5C5B08-807F-41A1-93D1-76439E8E1328}.Release|x86_32.ActiveCfg = Release|Win32
+		{8F5C5B08-807F-41A1-93D1-76439E8E1328}.Release|x86_32.Build.0 = Release|Win32
+		{8F5C5B08-807F-41A1-93D1-76439E8E1328}.Release|x86_64.ActiveCfg = Release|x64
+		{8F5C5B08-807F-41A1-93D1-76439E8E1328}.Release|x86_64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

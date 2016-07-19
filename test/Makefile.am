@@ -1,4 +1,9 @@
-noinst_PROGRAMS = test uncompress
+noinst_PROGRAMS = cmp test uncompress
+
+cmp_SOURCES = cmp.c
+cmp_CFLAGS  = $(AM_CFLAGS)
+cmp_LDFLAGS = $(AM_LDFLAGS)
+cmp_LDADD = ../src/libbled.a
 
 test_SOURCES = test.c
 test_CFLAGS  = $(AM_CFLAGS)
