@@ -20,15 +20,6 @@
 #error Only Windows platforms are supported
 #endif
 
-#if defined(DDKBUILD)
-#pragma warning(disable: 4242)		// "Conversion from x to y, possible loss of data"
-#pragma warning(disable: 4244)
-struct timeval {
-	long tv_sec;
-	long tv_usec;
-};
-#endif
-
 #include "platform.h"
 #include "msapi_utf8.h"
 
@@ -107,6 +98,9 @@ typedef unsigned int uid_t;
 extern smallint bb_got_signal;
 extern uint32_t *global_crc32_table;
 extern jmp_buf bb_error_jmp;
+extern char* bb_virtual_buf;
+extern size_t bb_virtual_len, bb_virtual_pos;
+extern int bb_virtual_fd;
 
 uint32_t* crc32_filltable(uint32_t *crc_table, int endian);
 uint32_t crc32_le(uint32_t crc, unsigned char const *p, size_t len, uint32_t *crc32table_le);
@@ -183,7 +177,15 @@ static inline int full_read(int fd, void *buf, size_t count) {
 		return -1;
 	}
 
-	rb = _read(fd, buf, (int)count);
+	if (fd == bb_virtual_fd) {
+		if (bb_virtual_pos + count > bb_virtual_len)
+			count = bb_virtual_len - bb_virtual_pos;
+		memcpy(buf, &bb_virtual_buf[bb_virtual_pos], count);
+		bb_virtual_pos += count;
+		rb = (int)count;
+	} else {
+		rb = _read(fd, buf, (int)count);
+	}
 	if (rb > 0) {
 		bb_total_rb += rb;
 		if (bled_progress != NULL)
@@ -193,12 +195,8 @@ static inline int full_read(int fd, void *buf, size_t count) {
 }
 
 static inline struct tm *localtime_r(const time_t *timep, struct tm *result) {
-#if defined(DDKBUILD)
-	result = localtime(timep);
-#else
 	if (localtime_s(result, timep) != 0)
 		result = NULL;
-#endif
 	return result;
 }
 

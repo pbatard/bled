@@ -11,7 +11,9 @@
 *.mac
 *.ncb
 *.o
+*.o_manifest
 *.obj
+*.opensdf
 *.opt
 *.pc
 *.pdb
@@ -22,8 +24,7 @@
 *.swp
 *.tlog
 *.user
-*.opensdf
-*.o_manifest
+*.vs
 .deps
 .libs
 Makefile
