@@ -69,7 +69,7 @@ comes along.
 
 Either:
 
-* Visual Studio 2013 (or later)
+* Visual Studio 2019
 * MinGW
 
 Then use the `.sln` file or run `configure` + `make`.

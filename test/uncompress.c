@@ -43,7 +43,7 @@ void progress_func(const uint64_t read_bytes)
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	float progress;
 
-	if (GetTickCount() < (LastRefresh + 100))
+	if ((GetTickCount() < (LastRefresh + 100)) && (read_bytes != src_size))
 		return;
 	LastRefresh = GetTickCount();
 
