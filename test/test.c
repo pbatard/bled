@@ -1,7 +1,7 @@
 /*
  * Bled (Base Library for Easy Decompression) - test function
  *
- * Copyright © 2014-2015 Pete Batard <pete@akeo.ie>
+ * Copyright ï¿½ 2014-2015 Pete Batard <pete@akeo.ie>
  *
  * Licensed under GPLv2 or later, see file LICENSE in this source tree.
  */
@@ -42,7 +42,7 @@ int main(int argc, char** argv)
 	int64_t r;
 	char src[256], dst[256], *buffer = NULL;
 
-	bled_init(NULL, NULL, NULL);
+	bled_init(NULL, NULL, NULL, NULL, NULL);
 
 	printf("DECOMPRESS TO BUFFER:\n");
 	buffer = malloc(BUFSIZE);

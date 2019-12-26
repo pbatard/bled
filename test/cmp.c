@@ -3,7 +3,7 @@
  * The following decompresses a large zipped Raspbian image, and compares it
  * with its uncompressed version to detect potential decompression errors.
  *
- * Copyright © 2016 Pete Batard <pete@akeo.ie>
+ * Copyright ï¿½ 2016 Pete Batard <pete@akeo.ie>
  *
  * Licensed under GPLv2 or later, see file LICENSE in this source tree.
  */
@@ -59,7 +59,7 @@ int main(int argc, char** argv)
 		goto out;
 	}
 
-	bled_init(NULL, NULL, NULL);
+	bled_init(NULL, NULL, NULL, NULL, NULL);
 	printf("Decompressing...\n");
 	bled_uncompress_with_handles(hSrc, hDst, BLED_COMPRESSION_ZIP);
 	bled_exit();

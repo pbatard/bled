@@ -99,7 +99,7 @@ int main(int argc, char** argv)
 			}
 
 			LastRefresh = 0;
-			bled_init((printf_t)printf, progress_func, NULL);
+			bled_init((printf_t)printf, NULL, NULL, progress_func, NULL);
 			wb = bled_uncompress_with_handles(hSrc, hDst, file_assoc[i].type);
 			bled_exit();
 			printf("\n");
