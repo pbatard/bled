@@ -3,7 +3,7 @@
  * The following decompresses a large zipped Raspbian image, and compares it
  * with its uncompressed version to detect potential decompression errors.
  *
- * Copyright � 2016 Pete Batard <pete@akeo.ie>
+ * Copyright © 2016-2020 Pete Batard <pete@akeo.ie>
  *
  * Licensed under GPLv2 or later, see file LICENSE in this source tree.
  */
@@ -26,7 +26,7 @@ int main(int argc, char** argv)
 	int64_t rb, ref_size;
 	DWORD rSize[2];
 	uint8_t buffer[2][BUFSIZE];
-	HANDLE hSrc, hDst, hRef;
+	HANDLE hSrc = NULL, hDst = NULL, hRef = NULL;
 	LARGE_INTEGER li;
 
 	// Needed to prevent stdout buffering with MinGW
@@ -109,7 +109,7 @@ out:
 	if (hDst != NULL)
 		CloseHandle(hDst);
 	if (hRef != NULL)
-		CloseHandle(hDst);
+		CloseHandle(hRef);
 
 	return ret;
 }
