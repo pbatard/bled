@@ -1,7 +1,7 @@
 /*
  * Bled (Base Library for Easy Decompression) - simple uncompress app
  *
- * Copyright © 2015 Pete Batard <pete@akeo.ie>
+ * Copyright © 2015-2020 Pete Batard <pete@akeo.ie>
  *
  * Licensed under GPLv2 or later, see file LICENSE in this source tree.
  */
@@ -99,7 +99,7 @@ int main(int argc, char** argv)
 			}
 
 			LastRefresh = 0;
-			bled_init((printf_t)printf, NULL, NULL, progress_func, NULL);
+			bled_init(NULL, NULL, NULL, progress_func, NULL);
 			wb = bled_uncompress_with_handles(hSrc, hDst, file_assoc[i].type);
 			bled_exit();
 			printf("\n");
@@ -121,10 +121,6 @@ out:
 		CloseHandle(hSrc);
 	if (hDst != INVALID_HANDLE_VALUE)
 		CloseHandle(hDst);
-#if defined(_MSC_VER) && defined(_DEBUG)
-	printf("\nPress <ENTER> to exit.\n");
-	while(getchar() != '\n');
-#endif
 
 #ifdef _CRTDBG_MAP_ALLOC
 	_CrtDumpMemoryLeaks();

@@ -1,7 +1,7 @@
 /*
  * unzip implementation for Bled/busybox
  *
- * Copyright © 2015 Pete Batard <pete@akeo.ie>
+ * Copyright © 2015-2020 Pete Batard <pete@akeo.ie>
  * Based on mini unzip implementation for busybox © Ed Clark
  * Loosely based on original busybox unzip applet © Laurence Anderson.
  *
@@ -162,19 +162,19 @@ struct BUG_cde_header_must_be_16_bytes {
 #define BAD_CDF_OFFSET ((uint32_t)0xffffffff)
 
 /* NB: does not preserve file position! */
-static uint32_t find_cdf_offset(void)
+static uint32_t find_cdf_offset(int fd)
 {
 	cde_header_t cde_header;
 	unsigned char *p;
 	off_t end;
 	unsigned char *buf = xzalloc(PEEK_FROM_END);
 
-	end = xlseek(zip_fd, 0, SEEK_END);
+	end = lseek(fd, 0, SEEK_END);
 	end -= PEEK_FROM_END;
 	if (end < 0)
 		end = 0;
-	xlseek(zip_fd, end, SEEK_SET);
-	full_read(zip_fd, buf, PEEK_FROM_END);
+	lseek(fd, end, SEEK_SET);
+	full_read(fd, buf, PEEK_FROM_END);
 
 	cde_header.formatted.cdf_offset = BAD_CDF_OFFSET;
 	p = buf;
@@ -205,18 +205,18 @@ static uint32_t find_cdf_offset(void)
 	return cde_header.formatted.cdf_offset;
 };
 
-static uint32_t read_next_cdf(uint32_t cdf_offset, cdf_header_t *cdf_ptr)
+static uint32_t read_next_cdf(int fd, uint32_t cdf_offset, cdf_header_t *cdf_ptr)
 {
 	off_t org;
 
-	org = xlseek(zip_fd, 0, SEEK_CUR);
+	org = lseek(fd, 0, SEEK_CUR);
 
 	if (!cdf_offset)
-		cdf_offset = find_cdf_offset();
+		cdf_offset = find_cdf_offset(fd);
 
 	if (cdf_offset != BAD_CDF_OFFSET) {
-		xlseek(zip_fd, cdf_offset + 4, SEEK_SET);
-		xread(zip_fd, cdf_ptr->raw, CDF_HEADER_LEN);
+		lseek(fd, cdf_offset + 4, SEEK_SET);
+		_read(fd, cdf_ptr->raw, CDF_HEADER_LEN);
 		FIX_ENDIANNESS_CDF(*cdf_ptr);
 		cdf_offset += 4 + CDF_HEADER_LEN
 			+ cdf_ptr->formatted.file_name_length
@@ -224,16 +224,16 @@ static uint32_t read_next_cdf(uint32_t cdf_offset, cdf_header_t *cdf_ptr)
 			+ cdf_ptr->formatted.file_comment_length;
 	}
 
-	xlseek(zip_fd, org, SEEK_SET);
+	lseek(fd, org, SEEK_SET);
 	return cdf_offset;
 };
 #endif
 
-static void unzip_skip(int zip_fd, off_t skip)
+static void unzip_skip(int fd, off_t skip)
 {
 	if (skip != 0)
-		if (lseek(zip_fd, skip, SEEK_CUR) == (off_t)-1)
-			bb_copyfd_exact_size(zip_fd, -1, skip);
+		if (lseek(fd, skip, SEEK_CUR) == (off_t)-1)
+			bb_copyfd_exact_size(fd, -1, skip);
 }
 
 IF_DESKTOP(long long) int FAST_FUNC unpack_zip_stream(transformer_state_t *xstate)
@@ -281,21 +281,21 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_zip_stream(transformer_state_t *xstat
 
 		if (cdf_offset != BAD_CDF_OFFSET) {
 			cdf_header_t cdf_header;
-			cdf_offset = read_next_cdf(cdf_offset, &cdf_header);
+			cdf_offset = read_next_cdf(xstate->src_fd, cdf_offset, &cdf_header);
 			/*
-				* Note: cdf_offset can become BAD_CDF_OFFSET after the above call.
-				*/
+			 * Note: cdf_offset can become BAD_CDF_OFFSET after the above call.
+			 */
 			if (zip_header.formatted.zip_flags & SWAP_LE16(0x0008)) {
 				/* 0x0008 - streaming. [u]cmpsize can be reliably gotten
-					* only from Central Directory. See unzip_doc.txt
-					*/
+				 * only from Central Directory. See unzip_doc.txt
+				 */
 				zip_header.formatted.crc32    = cdf_header.formatted.crc32;
 				zip_header.formatted.cmpsize  = cdf_header.formatted.cmpsize;
 				zip_header.formatted.ucmpsize = cdf_header.formatted.ucmpsize;
 			}
 			if ((cdf_header.formatted.version_made_by >> 8) == 3) {
 				/* This archive is created on Unix */
-				dir_mode = file_mode = (cdf_header.formatted.external_file_attributes >> 16);
+				// dir_mode = file_mode = (cdf_header.formatted.external_file_attributes >> 16);
 			}
 		}
 		if (cdf_offset == BAD_CDF_OFFSET

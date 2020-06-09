@@ -41,8 +41,14 @@
 
 #define BB_BUFSIZE 0x40000
 
+#define ENABLE_DESKTOP 1
+#if ENABLE_DESKTOP
 #define IF_DESKTOP(x) x
 #define IF_NOT_DESKTOP(x)
+#else
+#define IF_DESKTOP(x)
+#define IF_NOT_DESKTOP(x) x
+#endif
 #define IF_NOT_FEATURE_LZMA_FAST(x) x
 
 #define uoff_t unsigned off_t

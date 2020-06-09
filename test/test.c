@@ -1,7 +1,7 @@
 /*
  * Bled (Base Library for Easy Decompression) - test function
  *
- * Copyright � 2014-2015 Pete Batard <pete@akeo.ie>
+ * Copyright © 2014-2020 Pete Batard <pete@akeo.ie>
  *
  * Licensed under GPLv2 or later, see file LICENSE in this source tree.
  */
@@ -68,11 +68,6 @@ int main(int argc, char** argv)
 out:
 	free(buffer);
 	bled_exit();
-
-#if defined(_MSC_VER) && defined(_DEBUG)
-	printf("\nPress <ENTER> to exit.\n");
-	while(getchar() != '\n');
-#endif
 
 #ifdef _CRTDBG_MAP_ALLOC
 	_CrtDumpMemoryLeaks();
