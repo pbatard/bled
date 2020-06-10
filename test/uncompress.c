@@ -20,6 +20,8 @@
 #include <stdio.h>
 #include "../src/bled.h"
 
+#define IS_DIRECTORY(x) ((x != INVALID_FILE_ATTRIBUTES) && (x & FILE_ATTRIBUTE_DIRECTORY))
+
 typedef struct {
 	const char* ext;
 	bled_compression_type type;
@@ -36,6 +38,11 @@ static comp_assoc file_assoc[] = {
 
 static DWORD LastRefresh;
 static uint64_t src_size;
+
+void switch_func(const char* filename, const uint64_t filesize)
+{
+	printf("Extracting '%s' (%lld bytes)\n", filename, filesize);
+}
 
 void progress_func(const uint64_t read_bytes)
 {
@@ -58,14 +65,15 @@ int main(int argc, char** argv)
 {
 	char *p;
 	int r = 1;
-	size_t i;
+	size_t i = 0;
 	int64_t wb = 0;
 	LARGE_INTEGER li;
 	HANDLE hSrc = INVALID_HANDLE_VALUE, hDst = INVALID_HANDLE_VALUE;
+	DWORD dwAttrib;
 
 	if (argc != 3) {
-		fprintf(stderr, "Uncompress an archive to a file\n");
-		fprintf(stderr, "Usage: %s <archive> <file>\n", argv[0]);
+		fprintf(stderr, "Uncompress an archive to a file or a directory\n");
+		fprintf(stderr, "Usage: %s <archive> <dest>\n", argv[0]);
 		goto out;
 	}
 
@@ -75,39 +83,49 @@ int main(int argc, char** argv)
 		goto out;
 	}
 
+	dwAttrib = GetFileAttributesA(argv[2]);
 	for (i = 0; i<ARRAYSIZE(file_assoc); i++) {
 		if (strcmp(p, file_assoc[i].ext) == 0) {
-
-			li.QuadPart = 0;
-			hSrc = CreateFileA(argv[1], GENERIC_READ, FILE_SHARE_READ, NULL,
-				OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
-			if (hSrc == INVALID_HANDLE_VALUE) {
-				fprintf(stderr, "Could not open '%s': error 0x%0X\n", argv[1], (uint32_t)GetLastError());
-				goto out;
-			}
-			if (!GetFileSizeEx(hSrc, &li)) {
-				fprintf(stderr, "Unable to get the size of '%s': error 0x%0X\n", argv[1], (uint32_t)GetLastError());
-				goto out;
-			}
-			src_size = li.QuadPart;
-
-			hDst = CreateFileA(argv[2], GENERIC_WRITE, FILE_SHARE_WRITE, NULL,
-				CREATE_ALWAYS, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
-			if (hDst == INVALID_HANDLE_VALUE) {
-				fprintf(stderr, "Could not create '%s': error 0x%0X\n", argv[2], (uint32_t)GetLastError());
-				goto out;
-			}
-
-			LastRefresh = 0;
-			bled_init(NULL, NULL, NULL, progress_func, NULL);
-			wb = bled_uncompress_with_handles(hSrc, hDst, file_assoc[i].type);
-			bled_exit();
-			printf("\n");
-			if (wb > 0) {
-				printf("Uncompressed size: %I64d bytes\n", wb);
-				r = 0;
+			if (IS_DIRECTORY(dwAttrib)) {
+				bled_init(NULL, NULL, NULL, NULL, switch_func, NULL);
+				wb = bled_uncompress_to_dir(argv[1], argv[2], file_assoc[i].type);
+				bled_exit();
+				if (wb <= 0)
+					fprintf(stderr, "Decompression error: %d\n", (int)wb);
+				else
+					r = 0;
 			} else {
-				fprintf(stderr, "Decompression error: %d\n", (int)wb);
+				li.QuadPart = 0;
+				hSrc = CreateFileA(argv[1], GENERIC_READ, FILE_SHARE_READ, NULL,
+					OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+				if (hSrc == INVALID_HANDLE_VALUE) {
+					fprintf(stderr, "Could not open '%s': error 0x%0X\n", argv[1], (uint32_t)GetLastError());
+					goto out;
+				}
+				if (!GetFileSizeEx(hSrc, &li)) {
+					fprintf(stderr, "Unable to get the size of '%s': error 0x%0X\n", argv[1], (uint32_t)GetLastError());
+					goto out;
+				}
+				src_size = li.QuadPart;
+
+				hDst = CreateFileA(argv[2], GENERIC_WRITE, FILE_SHARE_WRITE, NULL,
+					CREATE_ALWAYS, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+				if (hDst == INVALID_HANDLE_VALUE) {
+					fprintf(stderr, "Could not create '%s': error 0x%0X\n", argv[2], (uint32_t)GetLastError());
+					goto out;
+				}
+
+				LastRefresh = 0;
+				bled_init(NULL, NULL, NULL, progress_func, NULL, NULL);
+				wb = bled_uncompress_with_handles(hSrc, hDst, file_assoc[i].type);
+				bled_exit();
+				printf("\n");
+				if (wb > 0) {
+					printf("Uncompressed size: %I64d bytes\n", wb);
+					r = 0;
+				} else {
+					fprintf(stderr, "Decompression error: %d\n", (int)wb);
+				}
 			}
 			break;
 		}

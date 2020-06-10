@@ -240,13 +240,13 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_zip_stream(transformer_state_t *xstat
 {
 	IF_DESKTOP(long long) int n = -EFAULT;
 	zip_header_t zip_header;
-	char *filename = NULL;
 #if ENABLE_DESKTOP
 	uint32_t cdf_offset = 0;
 #endif
 
 	while (1) {
 		uint32_t magic;
+		bool is_dir = false;
 		/* Check magic number */
 		safe_read(xstate->src_fd, &magic, 4);
 		/* Central directory? It's at the end, so exit */
@@ -261,12 +261,12 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_zip_stream(transformer_state_t *xstat
 		}
 #endif
 		if (magic != ZIP_FILEHEADER_MAGIC)
-			bb_error_msg_and_err("invalid zip magic %08X", (int)magic);
+			bb_error_msg_and_err("invalid zip magic 0x%08X", magic);
 
 		/* Read the file header */
 		safe_read(xstate->src_fd, zip_header.raw, ZIP_HEADER_LEN);
 		FIX_ENDIANNESS_ZIP(zip_header);
-		if (zip_header.formatted.method != 8) {
+		if ((zip_header.formatted.method != 8) && (zip_header.formatted.method != 0)) {
 			bb_error_msg_and_err("zip method method %d is not supported", zip_header.formatted.method);
 		}
 #if !ENABLE_DESKTOP
@@ -293,10 +293,8 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_zip_stream(transformer_state_t *xstat
 				zip_header.formatted.cmpsize  = cdf_header.formatted.cmpsize;
 				zip_header.formatted.ucmpsize = cdf_header.formatted.ucmpsize;
 			}
-			if ((cdf_header.formatted.version_made_by >> 8) == 3) {
-				/* This archive is created on Unix */
-				// dir_mode = file_mode = (cdf_header.formatted.external_file_attributes >> 16);
-			}
+			/* Check for UNIX/DOS/WIN directory */
+			is_dir = cdf_header.formatted.external_file_attributes & 0x40000010;
 		}
 		if (cdf_offset == BAD_CDF_OFFSET
 			&& (zip_header.formatted.zip_flags & SWAP_LE16(0x0008))
@@ -306,28 +304,43 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_zip_stream(transformer_state_t *xstat
 		}
 #endif
 
-		/* Read filename */
-		filename = xzalloc(zip_header.formatted.filename_len + 1);
-		safe_read(xstate->src_fd, filename, zip_header.formatted.filename_len);
-		bb_printf("Processing archive file '%s'", filename);
-		free(filename);
+		/* Handle multiple file switching */
+		if ((!is_dir) && (xstate->dst_dir != NULL)) {
+			xstate->dst_size = zip_header.formatted.ucmpsize;
+			xstate->dst_name = xzalloc(zip_header.formatted.filename_len + 1);
+			safe_read(xstate->src_fd, xstate->dst_name, zip_header.formatted.filename_len);
+			n = transformer_switch_file(xstate);
+			free(xstate->dst_name);
+			if (n < 0)
+				goto err;
+		} else {
+			unzip_skip(xstate->src_fd, zip_header.formatted.filename_len);
+		}
 
 		/* Skip extra header bytes */
 		unzip_skip(xstate->src_fd, zip_header.formatted.extra_len);
 
-		/* Method 8 - inflate */
-		xstate->bytes_in = zip_header.formatted.cmpsize;
-		n = inflate_unzip(xstate);
+		if (zip_header.formatted.method == 0) {
+			if (!is_dir)
+				bb_error_msg_and_err("zip method method 0 is only supported for directories");
+		} else {
+			/* Method 8 - inflate */
+			xstate->bytes_in = zip_header.formatted.cmpsize;
+			n = inflate_unzip(xstate);
 
-		/* Validate decompression */
-		if (n >= 0) {
-			if (zip_header.formatted.ucmpsize != xstate->bytes_out)
-				bb_error_msg_and_err("bad length");
-			else if (zip_header.formatted.crc32 != (xstate->crc32 ^ 0xffffffffL))
-				bb_error_msg_and_err("crc error");
-		} else if (n != -ENOSPC) {
-			bb_error_msg_and_err("inflate error");
+			/* Validate decompression */
+			if (n >= 0) {
+				if (zip_header.formatted.ucmpsize != xstate->bytes_out)
+					bb_error_msg_and_err("bad length");
+				else if (zip_header.formatted.crc32 != (xstate->crc32 ^ 0xffffffffL))
+					bb_error_msg_and_err("crc error");
+			} else if (n != -ENOSPC) {
+				bb_error_msg_and_err("inflate error");
+			}
 		}
+		/* Only process the first file if not extracting to a dir */
+		if (xstate->dst_dir == NULL)
+			break;
 	}
 
 err:

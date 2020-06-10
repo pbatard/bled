@@ -128,6 +128,7 @@ typedef struct _llist_t {
 
 extern void (*bled_printf) (const char* format, ...);
 extern void (*bled_progress) (const uint64_t processed_bytes);
+extern void (*bled_switch) (const char* filename, const uint64_t filesize);
 extern int (*bled_read)(int fd, void* buf, unsigned int count);
 extern int (*bled_write)(int fd, const void* buf, unsigned int count);
 extern unsigned long* bled_cancel_request;
