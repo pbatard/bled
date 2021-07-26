@@ -239,7 +239,7 @@ static inline int transformer_switch_file(transformer_state_t* xstate)
 		_close(xstate->dst_fd);
 		xstate->dst_fd = -1;
 	}
-	_snprintf_s(dst, sizeof(dst), sizeof(dst), "%s/%s", xstate->dst_dir, xstate->dst_name);
+	_snprintf_s(dst, sizeof(dst), _TRUNCATE, "%s/%s", xstate->dst_dir, xstate->dst_name);
 	for (i = 0; i < strlen(dst); i++) {
 		if (dst[i] == '/')
 			dst[i] = '\\';
@@ -266,6 +266,7 @@ IF_DESKTOP(long long) int unpack_gz_stream(transformer_state_t *xstate) FAST_FUN
 IF_DESKTOP(long long) int unpack_bz2_stream(transformer_state_t *xstate) FAST_FUNC;
 IF_DESKTOP(long long) int unpack_lzma_stream(transformer_state_t *xstate) FAST_FUNC;
 IF_DESKTOP(long long) int unpack_xz_stream(transformer_state_t *xstate) FAST_FUNC;
+IF_DESKTOP(long long) int unpack_vtsi_stream(transformer_state_t *xstate) FAST_FUNC;
 
 char* append_ext(char *filename, const char *expected_ext) FAST_FUNC;
 int bbunpack(char **argv,
