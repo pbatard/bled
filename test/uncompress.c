@@ -18,6 +18,7 @@
 #endif
 
 #include <stdio.h>
+#include <inttypes.h>
 #include "../src/bled.h"
 
 #define IS_DIRECTORY(x) ((x != INVALID_FILE_ATTRIBUTES) && (x & FILE_ATTRIBUTE_DIRECTORY))
@@ -121,7 +122,7 @@ int main(int argc, char** argv)
 				bled_exit();
 				printf("\n");
 				if (wb > 0) {
-					printf("Uncompressed size: %I64d bytes\n", wb);
+					printf("Uncompressed size: %" PRIi64 "d bytes\n", wb);
 					r = 0;
 				} else {
 					fprintf(stderr, "Decompression error: %d\n", (int)wb);

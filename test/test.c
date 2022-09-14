@@ -13,12 +13,13 @@
 #endif
 
 #include <stdio.h>
+#include <inttypes.h>
 #include "../src/bled.h"
 
 printf_t print_function = NULL;
 
 // It's a unit test, not a sample, so I'll hardcode whatever the hell I want
-#define BASE_PATH "D:\\Projects\\bled\\test\\data\\"
+#define BASE_PATH "C:\\Projects\\bled\\test\\data\\"
 #define BASE_FILE "xz"
 
 struct {
@@ -50,7 +51,7 @@ int main(int argc, char** argv)
 		sprintf_s(src, sizeof(src), "%s%s.%s", BASE_PATH, BASE_FILE, test_files[i].ext);
 		r = bled_uncompress_to_buffer(src, buffer, BUFSIZE, test_files[i].type);
 		buffer[BUFSIZE-1] = 0;
-		printf("  %s:\t%I64d - \"%s\"\n", test_files[i].ext, r, &buffer[BUFSIZE-6]);
+		printf("  %s:\t%" PRIi64 "d - \"%s\"\n", test_files[i].ext, r, &buffer[BUFSIZE - 6]);
 		if (r < 0)
 			goto out;
 	}
@@ -60,7 +61,7 @@ int main(int argc, char** argv)
 		sprintf_s(src, sizeof(src), "%s%s.%s", BASE_PATH, BASE_FILE, test_files[i].ext);
 		sprintf_s(dst, sizeof(dst), "%s!%s.txt", BASE_PATH, test_files[i].ext);
 		r = bled_uncompress(src, dst, test_files[i].type);
-		printf("  %s:\t%I64d\n", test_files[i].ext, r);
+		printf("  %s:\t%" PRIi64 "d\n", test_files[i].ext, r);
 		if (r < 0)
 			goto out;
 	}
