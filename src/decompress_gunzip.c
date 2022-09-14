@@ -319,6 +319,7 @@ static int huft_build(const unsigned *b, const unsigned n,
 	eob_len = n > 256 ? b[256] : BMAX;
 
 	*t = NULL;
+	memset(&r, 0, sizeof(r));
 
 	/* Generate counts for each bit length */
 	memset(c, 0, sizeof(c));
@@ -976,7 +977,7 @@ inflate_unzip_internal(STATE_PARAM transformer_state_t *xstate)
 	ssize_t nwrote;
 
 	/* Allocate all global buffers (for DYN_ALLOC option) */
-	gunzip_window = xmalloc(GUNZIP_WSIZE);
+	gunzip_window = xzalloc(GUNZIP_WSIZE);
 	gunzip_outbuf_count = 0;
 	gunzip_bytes_out = 0;
 	gunzip_src_fd = xstate->src_fd;
@@ -1165,6 +1166,7 @@ static int check_header_gzip(STATE_PARAM transformer_state_t *xstate)
 			do {
 				if (!top_up(PASS_STATE 1))
 					return 0;
+			// coverity[tainted_data]
 			} while (bytebuffer[bytebuffer_offset++] != 0);
 			if ((header.formatted.flags & 0x18) != 0x18)
 				break;

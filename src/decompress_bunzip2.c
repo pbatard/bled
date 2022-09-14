@@ -136,6 +136,7 @@ static unsigned get_bits(bunzip_data *bd, int bits_wanted)
 		if (bit_count >= 24) {
 			bits = bd->inbufBits & ((1 << bit_count) - 1);
 			bits_wanted -= bit_count;
+			// coverity[negative_shift]
 			bits <<= bits_wanted;
 			bit_count = 0;
 		}

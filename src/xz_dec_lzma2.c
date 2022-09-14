@@ -788,6 +788,7 @@ static void XZ_FUNC lzma_reset(struct xz_dec_lzma2 *s)
 	 */
 	probs = s->lzma.is_match[0];
 	for (i = 0; i < PROBS_TOTAL; ++i)
+		// coverity[overrun-local]
 		probs[i] = RC_BIT_MODEL_TOTAL / 2;
 
 	rc_reset(&s->rc);
@@ -1044,6 +1045,7 @@ XZ_EXTERN NOINLINE enum xz_ret XZ_FUNC xz_dec_lzma2_run(
 				return XZ_DATA_ERROR;
 
 			s->lzma2.sequence = SEQ_LZMA_PREPARE;
+			// Fall through
 
 		case SEQ_LZMA_PREPARE:
 			if (s->lzma2.compressed < RC_INIT_BYTES)
@@ -1054,6 +1056,7 @@ XZ_EXTERN NOINLINE enum xz_ret XZ_FUNC xz_dec_lzma2_run(
 
 			s->lzma2.compressed -= RC_INIT_BYTES;
 			s->lzma2.sequence = SEQ_LZMA_RUN;
+			// Fall through
 
 		case SEQ_LZMA_RUN:
 			/*
