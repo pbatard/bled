@@ -1,9 +1,12 @@
 /*
  * MSAPI_UTF8: Common API calls using UTF-8 strings
- * Compensating for what Microsoft should have done a long long time ago.
- * Also see https://utf8everywhere.org
+ * Compensating for what Microsoft should have done a long long time ago, that they
+ * ONLY started to do in mid-2019 (What the £%^& took them so long?!?), as per:
+ * https://docs.microsoft.com/en-us/windows/uwp/design/globalizing/use-utf8-code-page
  *
- * Copyright © 2010-2020 Pete Batard <pete@akeo.ie>
+ * See also: https://utf8everywhere.org
+ *
+ * Copyright © 2010-2023 Pete Batard <pete@akeo.ie>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -314,6 +317,18 @@ static __inline HMODULE LoadLibraryU(LPCSTR lpFileName)
 	return ret;
 }
 
+static __inline HMODULE LoadLibraryExU(LPCSTR lpFileName, HANDLE hFile, DWORD dwFlags)
+{
+	HMODULE ret;
+	DWORD err = ERROR_INVALID_DATA;
+	wconvert(lpFileName);
+	ret = LoadLibraryExW(wlpFileName, hFile, dwFlags);
+	err = GetLastError();
+	wfree(lpFileName);
+	SetLastError(err);
+	return ret;
+}
+
 static __inline int DrawTextU(HDC hDC, LPCSTR lpText, int nCount, LPRECT lpRect, UINT uFormat)
 {
 	int ret;
@@ -329,19 +344,19 @@ static __inline int DrawTextU(HDC hDC, LPCSTR lpText, int nCount, LPRECT lpRect,
 static __inline int GetWindowTextU(HWND hWnd, char* lpString, int nMaxCount)
 {
 	int ret = 0;
-	DWORD err = ERROR_INVALID_DATA;
+	DWORD err = ERROR_INVALID_PARAMETER;
+	if (lpString == NULL || nMaxCount < 1)
+		goto out;
 	// Handle the empty string as GetWindowTextW() returns 0 then
-	if ((lpString != NULL) && (nMaxCount > 0))
-		lpString[0] = 0;
-	// coverity[returned_null]
+	lpString[0] = 0;
 	walloc(lpString, nMaxCount);
 	ret = GetWindowTextW(hWnd, wlpString, nMaxCount);
 	err = GetLastError();
-	// coverity[var_deref_model]
-	if ( (ret != 0) && ((ret = wchar_to_utf8_no_alloc(wlpString, lpString, nMaxCount)) == 0) ) {
+	if ((ret != 0) && ((ret = wchar_to_utf8_no_alloc(wlpString, lpString, nMaxCount)) == 0))
 		err = GetLastError();
-	}
 	wfree(lpString);
+	lpString[nMaxCount - 1] = 0;
+out:
 	SetLastError(err);
 	return ret;
 }
@@ -568,13 +583,27 @@ static __inline BOOL GetTextExtentPointU(HDC hdc, const char* lpString, LPSIZE l
 	return ret;
 }
 
+// A UTF-8 alternative to MS GetCurrentDirectory() since the latter is useless for
+// apps installed from the App Store...
 static __inline DWORD GetCurrentDirectoryU(DWORD nBufferLength, char* lpBuffer)
 {
-	DWORD ret = 0, err = ERROR_INVALID_DATA;
+	DWORD i, ret = 0, err = ERROR_INVALID_DATA;
 	// coverity[returned_null]
 	walloc(lpBuffer, nBufferLength);
-	ret = GetCurrentDirectoryW(nBufferLength, wlpBuffer);
+	if (wlpBuffer == NULL) {
+		SetLastError(ERROR_OUTOFMEMORY);
+		return 0;
+	}
+	ret = GetModuleFileNameW(NULL, wlpBuffer, nBufferLength);
 	err = GetLastError();
+	if (ret > 0) {
+		for (i = ret - 1; i > 0; i--) {
+			if (wlpBuffer[i] == L'\\') {
+				wlpBuffer[i] = 0;
+				break;
+			}
+		}
+	}
 	if ((ret != 0) && ((ret = wchar_to_utf8_no_alloc(wlpBuffer, lpBuffer, nBufferLength)) == 0)) {
 		err = GetLastError();
 	}
@@ -609,6 +638,19 @@ static __inline UINT GetSystemWindowsDirectoryU(char* lpBuffer, UINT uSize)
 		err = GetLastError();
 	}
 	wfree(lpBuffer);
+	SetLastError(err);
+	return ret;
+}
+
+static __inline BOOL SHGetSpecialFolderPathU(HWND hwnd, char* pszPath, int csidl, BOOL fCreate)
+{
+	BOOL ret;
+	DWORD err = ERROR_INVALID_DATA;
+	// pszPath is at least MAX_PATH characters in size
+	WCHAR wpszPath[MAX_PATH] = { 0 };
+	ret = SHGetSpecialFolderPathW(hwnd, wpszPath, csidl, fCreate);
+	err = GetLastError();
+	wchar_to_utf8_no_alloc(wpszPath, pszPath, MAX_PATH);
 	SetLastError(err);
 	return ret;
 }
@@ -753,7 +795,7 @@ static __inline int SHDeleteDirectoryExU(HWND hwnd, const char* pszPath, FILEOP_
 	int ret;
 	// String needs to be double NULL terminated, so we just use the length of the UTF-8 string
 	// which is always expected to be larger than our UTF-16 one, and add 2 chars for good measure.
-	size_t wpszPath_len = strlen(pszPath) + 2;
+	size_t wpszPath_len = (pszPath == NULL) ? 0 : strlen(pszPath) + 2;
 	// coverity[returned_null]
 	walloc(pszPath, wpszPath_len);
 	SHFILEOPSTRUCTW shfo = { hwnd, FO_DELETE, wpszPath, NULL, fFlags, FALSE, NULL, NULL };
@@ -1052,6 +1094,17 @@ static __inline int _accessU(const char* path, int mode)
 	return ret;
 }
 
+static __inline const char* _filenameU(const char* path)
+{
+	int i;
+	if (path == NULL)
+		return NULL;
+	for (i = (int)strlen(path) - 1; i >= 0; i--)
+		if ((path[i] == '/') || (path[i] == '\\'))
+			return &path[i + 1];
+	return path;
+}
+
 // returned UTF-8 string must be freed
 static __inline char* getenvU(const char* varname)
 {
@@ -1119,6 +1172,26 @@ static __inline int _rmdirU(const char* dirname)
 	return ret;
 }
 
+static __inline BOOL MoveFileU(const char* lpExistingFileName, const char* lpNewFileName)
+{
+	wconvert(lpExistingFileName);
+	wconvert(lpNewFileName);
+	BOOL ret = MoveFileW(wlpExistingFileName, wlpNewFileName);
+	wfree(lpNewFileName);
+	wfree(lpExistingFileName);
+	return ret;
+}
+
+static __inline BOOL MoveFileExU(const char* lpExistingFileName, const char* lpNewFileName, DWORD dwFlags)
+{
+	wconvert(lpExistingFileName);
+	wconvert(lpNewFileName);
+	BOOL ret = MoveFileExW(wlpExistingFileName, wlpNewFileName, dwFlags);
+	wfree(lpNewFileName);
+	wfree(lpExistingFileName);
+	return ret;
+}
+
 // The following expects PropertyBuffer to contain a single Unicode string
 static __inline BOOL SetupDiGetDeviceRegistryPropertyU(HDEVINFO DeviceInfoSet, PSP_DEVINFO_DATA DeviceInfoData,
 	DWORD Property, PDWORD PropertyRegDataType, PBYTE PropertyBuffer, DWORD PropertyBufferSize, PDWORD RequiredSize)
@@ -1137,6 +1210,33 @@ static __inline BOOL SetupDiGetDeviceRegistryPropertyU(HDEVINFO DeviceInfoSet, P
 		ret = FALSE;
 	}
 	wfree(PropertyBuffer);
+	SetLastError(err);
+	return ret;
+}
+
+// NB: This does not support the ERROR_INSUFFICIENT_BUFFER dance to retrieve the required buffer size
+static __inline BOOL GetUserNameU(LPSTR lpBuffer, LPDWORD pcbBuffer)
+{
+	BOOL ret;
+	DWORD err, size;
+	if (lpBuffer == NULL || pcbBuffer == NULL) {
+		SetLastError(ERROR_INVALID_PARAMETER);
+		return FALSE;
+	}
+	size = *pcbBuffer;
+	// coverity[returned_null]
+	walloc(lpBuffer, size);
+	ret = GetUserNameW(wlpBuffer, &size);
+	err = GetLastError();
+	if (ret) {
+		*pcbBuffer = (DWORD)wchar_to_utf8_no_alloc(wlpBuffer, lpBuffer, size);
+		if (*pcbBuffer == 0)
+			err = GetLastError();
+		else
+			// Reported size includes the NUL terminator
+			(*pcbBuffer)++;
+	}
+	wfree(lpBuffer);
 	SetLastError(err);
 	return ret;
 }

@@ -3,7 +3,7 @@
  * The following decompresses a large zipped Raspbian image, and compares it
  * with its uncompressed version to detect potential decompression errors.
  *
- * Copyright © 2016-2020 Pete Batard <pete@akeo.ie>
+ * Copyright © 2016-2023 Pete Batard <pete@akeo.ie>
  *
  * Licensed under GPLv2 or later, see file LICENSE in this source tree.
  */
@@ -15,7 +15,7 @@
 
 #define BUFSIZE 65536
 
-#define SRC_NAME "D:\\IMG\\2015-02-16-raspbian-wheezy.zip"
+#define SRC_NAME "D:\\Imgs\\2015-02-16-raspbian-wheezy.zip"
 #define DST_NAME "C:\\Downloads\\test.img"
 #define REF_NAME "C:\\Downloads\\2015-02-16-raspbian-wheezy.img"
 
@@ -33,17 +33,17 @@ int main(int argc, char** argv)
 	setbuf(stdout, NULL);
 
 	hSrc = CreateFileA(src, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
-	if (hSrc == NULL) {
+	if (hSrc == INVALID_HANDLE_VALUE) {
 		printf("Could not open source file '%s' - Error %ld\n", src, GetLastError());
 		goto out;
 	}
 	hDst = CreateFileA(dst, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
-	if (hDst == NULL) {
+	if (hDst == INVALID_HANDLE_VALUE) {
 		printf("Could not create destination file '%s' - Error %ld\n", dst, GetLastError());
 		goto out;
 	}
 	hRef = CreateFileA(ref, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
-	if (hRef == NULL) {
+	if (hRef == INVALID_HANDLE_VALUE) {
 		printf("Could not open reference file '%s' - Error %ld\n", ref, GetLastError());
 		goto out;
 	}
