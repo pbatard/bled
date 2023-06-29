@@ -9,8 +9,8 @@ is based almost entirely on the native decompression code found in [BusyBox](htt
 ## What's it for?
 
 It's a library, that can be used in applications to handle the decompression of
-__.Z__, __.gz__, __.bz2__, __.lzma__, __.xz__, __.zip__ and (_planned_) __.7z__
-compressed files and/or archives.
+__.Z__, __.gz__, __.bz2__, __.lzma__, __.xz__, __.zip__ compressed files and/or
+archives.
 
 ## Why are you doing that?
 
@@ -55,12 +55,12 @@ comes along.
 * Only Windows is supported for now (MinGW/gcc and MSVC). That's because:
   * Windows is the only platform I need for Rufus
   * The original `libbb.h` was GPLv2 __only__, so I had to recreate my own from scratch
-    that is GPLv2 __or later__. This was a bit of a pain, so I'm don't want to bother
+    that is GPLv2 __or later__. This was a bit of a pain, so I don't want to bother
     recreating a GPLv2+ libbb.h for Linux or other platforms.
 * Can't query the uncompressed file size. This is mostly due to the limitation of the
   compression formats being used, as most of them are stream formats and do not store
   that information anywhere.
-* .7z archive extraction is not currently supported. But I may add this feature if needed.
+* .7z archive extraction is not supported.
 * No multithreading and not optimized for speed __at all__!
 * There probably exist limitations with regards to advanced compression and/or newer
   compression formats.
