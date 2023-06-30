@@ -88,7 +88,7 @@ int main(int argc, char** argv)
 	for (i = 0; i<ARRAYSIZE(file_assoc); i++) {
 		if (strcmp(p, file_assoc[i].ext) == 0) {
 			if (IS_DIRECTORY(dwAttrib)) {
-				bled_init(NULL, NULL, NULL, NULL, switch_func, NULL);
+				bled_init(0, NULL, NULL, NULL, NULL, switch_func, NULL);
 				wb = bled_uncompress_to_dir(argv[1], argv[2], file_assoc[i].type);
 				bled_exit();
 				if (wb <= 0)
@@ -117,7 +117,7 @@ int main(int argc, char** argv)
 				}
 
 				LastRefresh = 0;
-				bled_init(NULL, NULL, NULL, progress_func, NULL, NULL);
+				bled_init(0, NULL, NULL, NULL, progress_func, NULL, NULL);
 				wb = bled_uncompress_with_handles(hSrc, hDst, file_assoc[i].type);
 				bled_exit();
 				printf("\n");

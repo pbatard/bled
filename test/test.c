@@ -43,7 +43,7 @@ int main(int argc, char** argv)
 	int64_t r;
 	char src[256], dst[256], *buffer = NULL;
 
-	bled_init(NULL, NULL, NULL, NULL, NULL, NULL);
+	bled_init(0, NULL, NULL, NULL, NULL, NULL, NULL);
 
 	printf("DECOMPRESS TO BUFFER:\n");
 	buffer = malloc(BUFSIZE);

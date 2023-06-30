@@ -59,7 +59,7 @@ int main(int argc, char** argv)
 		goto out;
 	}
 
-	bled_init(NULL, NULL, NULL, NULL, NULL, NULL);
+	bled_init(0, NULL, NULL, NULL, NULL, NULL, NULL);
 	printf("Decompressing...\n");
 	bled_uncompress_with_handles(hSrc, hDst, BLED_COMPRESSION_ZIP);
 	bled_exit();
