@@ -9,7 +9,7 @@ is based almost entirely on the native decompression code found in [BusyBox](htt
 ## What's it for?
 
 It's a library, that can be used in applications to handle the decompression of
-__.Z__, __.gz__, __.bz2__, __.lzma__, __.xz__, __.zip__ compressed files and/or
+__.Z__, __.gz__, __.bz2__, __.lzma__, __.xz__, __.zip__, __.zst__ compressed files and/or
 archives.
 
 ## Why are you doing that?

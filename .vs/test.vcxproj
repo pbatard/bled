@@ -136,12 +136,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\.msvc\bled.vcxproj">
+    <ProjectReference Include="bled.vcxproj">
       <Project>{fb6d52d4-a2f8-c358-db85-bbcaecfddd7d}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\test.c" />
+    <ClCompile Include="..\test\test.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
