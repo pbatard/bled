@@ -1,7 +1,7 @@
 /*
  * Bled (Base Library for Easy Decompression) - test function
  *
- * Copyright © 2014-2020 Pete Batard <pete@akeo.ie>
+ * Copyright © 2014-2024 Pete Batard <pete@akeo.ie>
  *
  * Licensed under GPLv2 or later, see file LICENSE in this source tree.
  */
@@ -32,6 +32,7 @@ struct {
 	{ "lzma", BLED_COMPRESSION_LZMA},
 	{ "bz2", BLED_COMPRESSION_BZIP2},
 	{ "xz", BLED_COMPRESSION_XZ},
+	{ "zst", BLED_COMPRESSION_ZSTD},
 //	{ "7z", BLED_COMPRESSION_7ZIP},	// Not implemented
 };
 
@@ -47,21 +48,21 @@ int main(int argc, char** argv)
 
 	printf("DECOMPRESS TO BUFFER:\n");
 	buffer = malloc(BUFSIZE);
-	for (i = 0; i<ARRAYSIZE(test_files); i++) {
+	for (i = 0; i < ARRAYSIZE(test_files); i++) {
 		sprintf_s(src, sizeof(src), "%s%s.%s", BASE_PATH, BASE_FILE, test_files[i].ext);
 		r = bled_uncompress_to_buffer(src, buffer, BUFSIZE, test_files[i].type);
-		buffer[BUFSIZE-1] = 0;
-		printf("  %s:\t%" PRIi64 "d - \"%s\"\n", test_files[i].ext, r, &buffer[BUFSIZE - 6]);
+		buffer[BUFSIZE - 1] = 0;
+		printf("  %s:\t%" PRIi64 " - \"%s\"\n", test_files[i].ext, r, &buffer[BUFSIZE - 6]);
 		if (r < 0)
 			goto out;
 	}
 
 	printf("\nDECOMPRESS TO FILE:\n");
-	for (i = 0; i<ARRAYSIZE(test_files); i++) {
+	for (i = 0; i < ARRAYSIZE(test_files); i++) {
 		sprintf_s(src, sizeof(src), "%s%s.%s", BASE_PATH, BASE_FILE, test_files[i].ext);
 		sprintf_s(dst, sizeof(dst), "%s!%s.txt", BASE_PATH, test_files[i].ext);
 		r = bled_uncompress(src, dst, test_files[i].type);
-		printf("  %s:\t%" PRIi64 "d\n", test_files[i].ext, r);
+		printf("  %s:\t%" PRIi64 "\n", test_files[i].ext, r);
 		if (r < 0)
 			goto out;
 	}

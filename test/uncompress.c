@@ -1,7 +1,7 @@
 /*
  * Bled (Base Library for Easy Decompression) - simple uncompress app
  *
- * Copyright © 2015-2020 Pete Batard <pete@akeo.ie>
+ * Copyright © 2015-2024 Pete Batard <pete@akeo.ie>
  *
  * Licensed under GPLv2 or later, see file LICENSE in this source tree.
  */
@@ -35,6 +35,7 @@ static comp_assoc file_assoc[] = {
 	{ ".lzma", BLED_COMPRESSION_LZMA },
 	{ ".bz2", BLED_COMPRESSION_BZIP2 },
 	{ ".xz", BLED_COMPRESSION_XZ },
+	{ ".zst", BLED_COMPRESSION_ZSTD },
 };
 
 static DWORD LastRefresh;
