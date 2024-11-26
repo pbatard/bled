@@ -49,6 +49,8 @@
     <ClCompile Include="..\src\xz_dec_bcj.c" />
     <ClCompile Include="..\src\xz_dec_lzma2.c" />
     <ClCompile Include="..\src\xz_dec_stream.c" />
+    <ClCompile Include="..\src\zstd_common.c" />
+    <ClCompile Include="..\src\zstd_ddict.c" />
     <ClCompile Include="..\src\zstd_decompress.c" />
     <ClCompile Include="..\src\zstd_decompress_block.c" />
     <ClCompile Include="..\src\zstd_entropy_common.c" />
