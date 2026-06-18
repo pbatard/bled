@@ -33,6 +33,7 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <string.h>
+#include <malloc.h>
 #include <time.h>
 #include <direct.h>
 #include <sys/stat.h>
@@ -40,6 +41,7 @@
 #include <io.h>
 
 #define ONE_TB                          1099511627776ULL
+#define SECTOR_ALIGNMENT                4096
 
 #define ENABLE_DESKTOP                  1
 #if ENABLE_DESKTOP
@@ -254,7 +256,7 @@ static inline void bb_copyfd_exact_size(int fd1, int fd2, off_t size)
 	if (size > ONE_TB)
 		bb_error_msg_and_die("too large");
 
-	buf = malloc(BB_BUFSIZE);
+	buf = _mm_malloc(BB_BUFSIZE, SECTOR_ALIGNMENT);
 	if (buf == NULL)
 		bb_error_msg_and_die("out of memory");
 
@@ -262,7 +264,7 @@ static inline void bb_copyfd_exact_size(int fd1, int fd2, off_t size)
 		int r, w;
 		r = full_read(fd1, buf, (unsigned int)MIN(size - rb, BB_BUFSIZE));
 		if (r < 0) {
-			free(buf);
+			_mm_free(buf);
 			bb_error_msg_and_die("read error");
 		}
 		if (r == 0) {
@@ -271,7 +273,7 @@ static inline void bb_copyfd_exact_size(int fd1, int fd2, off_t size)
 		}
 		w = full_write(fd2, buf, r);
 		if (w < 0) {
-			free(buf);
+			_mm_free(buf);
 			bb_error_msg_and_die("write error");
 		}
 		if (w != r) {
@@ -280,7 +282,7 @@ static inline void bb_copyfd_exact_size(int fd1, int fd2, off_t size)
 		}
 		rb += r;
 	}
-	free(buf);
+	_mm_free(buf);
 }
 
 static inline struct tm *localtime_r(const time_t *timep, struct tm *result) {
@@ -294,6 +296,9 @@ static inline struct tm *localtime_r(const time_t *timep, struct tm *result) {
 #define xmalloc malloc
 #define xzalloc(x) calloc(x, 1)
 #define malloc_or_warn malloc
+#define aligned_xmalloc(x) _mm_malloc(x, SECTOR_ALIGNMENT);
+static inline void* aligned_xzalloc(size_t x) { void* r = aligned_xmalloc(x); if (r) memset(r, 0, x); return r; }
+#define aligned_free _mm_free
 #define mkdir(x, y) _mkdirU(x)
 struct fd_pair { int rd; int wr; };
 void xpipe(int filedes[2]) FAST_FUNC;
