@@ -1,7 +1,7 @@
 /*
  * Bled (Base Library for Easy Decompression)
  *
- * Copyright © 2014-2024 Pete Batard <pete@akeo.ie>
+ * Copyright © 2014-2026 Pete Batard <pete@akeo.ie>
  *
  * Licensed under GPLv2 or later, see file LICENSE in this source tree.
  */
@@ -26,7 +26,7 @@ write_t bled_write = NULL;
 progress_t bled_progress = NULL;
 switch_t bled_switch = NULL;
 unsigned long* bled_cancel_request;
-static bool bled_initialized = 0;
+bool bled_initialized = 0;
 jmp_buf bb_error_jmp;
 char* bb_virtual_buf = NULL;
 size_t bb_virtual_len = 0, bb_virtual_pos = 0;

@@ -69,7 +69,7 @@ comes along.
 
 Either:
 
-* Visual Studio 2022
+* Visual Studio 2026
 * MinGW
 
 Then use the `.sln` file or run `configure` + `make`.
