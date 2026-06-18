@@ -11,9 +11,6 @@
 #include "bb_archive.h"
 
 #define XZ_EXTERN static
-// We get XZ_OPTIONS_ERROR in xz_dec_stream if this is not defined
-#define XZ_DEC_ANY_CHECK
-
 #define XZ_BUFSIZE BB_BUFSIZE
 
 #include "xz_dec_bcj.c"
