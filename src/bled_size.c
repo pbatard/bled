@@ -17,8 +17,6 @@
 
 typedef int64_t(*get_uncompressed_size_t)(int fd);
 
-extern bool bled_initialized;
-
 /* -------------------------------------------------------------------------
  * Internal helpers
  * ---------------------------------------------------------------------- */
@@ -78,7 +76,7 @@ int64_t get_uncompress_size_none(int fd)
 #define ZIP64_EXTRA_TAG    0x0001
 #define ZIP32_NEEDS_ZIP64  UINT32_C(0xFFFFFFFF)
 
-int64_t get_uncompress_size_zip(int fd)
+static int64_t get_uncompress_size_zip(int fd)
 {
 	uint8_t hdr[ZIP_LFH_HDR_SIZE];
 
@@ -153,7 +151,7 @@ int64_t get_uncompress_size_zip(int fd)
 #define GZIP_MAGIC_0 0x1F
 #define GZIP_MAGIC_1 0x8B
 
-int64_t get_uncompress_size_gz(int fd)
+static int64_t get_uncompress_size_gz(int fd)
 {
 	/* Verify magic bytes at offset 0. */
 	uint8_t magic[2];
@@ -193,7 +191,7 @@ int64_t get_uncompress_size_gz(int fd)
 #define LZMA_HEADER_SIZE    13   /* 1 + 4 + 8 */
 #define LZMA_SIZE_UNKNOWN   UINT64_C(0xFFFFFFFFFFFFFFFF)
 
-int64_t get_uncompress_size_lzma(int fd)
+static int64_t get_uncompress_size_lzma(int fd)
 {
 	uint8_t hdr[LZMA_HEADER_SIZE];
 
@@ -280,7 +278,7 @@ static uint64_t xz_read_vli(const uint8_t* buf, size_t buf_len, size_t* pos)
 	}
 }
 
-int64_t get_uncompress_size_xz(int fd)
+static int64_t get_uncompress_size_xz(int fd)
 {
 	/* ---- Verify Stream Header magic (6 bytes at offset 0) ---- */
 	uint8_t hdr_magic[6];
@@ -450,7 +448,7 @@ static uint64_t sz_read_num(const uint8_t* buf, size_t buf_len, size_t* pos)
 	return value;
 }
 
-int64_t get_uncompress_size_7zip(int fd)
+static int64_t get_uncompress_size_7zip(int fd)
 {
 	/* ---- Read & verify Signature Header (32 bytes) ---- */
 	uint8_t sig_hdr[32];
@@ -593,7 +591,7 @@ int64_t get_uncompress_size_7zip(int fd)
  * Ventoy Sparse Image (.vsti)
  * ---------------------------------------------------------------------- */
 
-int64_t get_uncompress_size_vtsi(int fd)
+static int64_t get_uncompress_size_vtsi(int fd)
 {
 	if (lseek(fd, -512 + 8 + 4, SEEK_END) < 0)
 		return DECOMP_SIZE_ERROR;
@@ -633,7 +631,7 @@ int64_t get_uncompress_size_vtsi(int fd)
 #define ZSTD_MAGIC          UINT32_C(0xFD2FB528)
 #define ZSTD_MAGIC_SIZE     4
 
-int64_t get_uncompress_size_zstd(int fd)
+static int64_t get_uncompress_size_zstd(int fd)
 {
 	uint8_t buf[4 + 1 + 1]; /* magic + FHD + optional Window_Descriptor */
 
@@ -704,7 +702,7 @@ int64_t get_uncompress_size_zstd(int fd)
 	return (int64_t)size;
 }
 
-get_uncompressed_size_t get_uncompressed_size[BLED_COMPRESSION_MAX] = {
+static get_uncompressed_size_t _get_uncompressed_size[BLED_COMPRESSION_MAX] = {
 	get_uncompress_size_none,
 	get_uncompress_size_zip,
 	get_uncompress_size_none,	// .Z has no decompressed size info
@@ -717,30 +715,18 @@ get_uncompressed_size_t get_uncompressed_size[BLED_COMPRESSION_MAX] = {
 	get_uncompress_size_zstd,
 };
 
-/* Get the decompressed size of file 'src', compressed using 'type' */
-int64_t bled_get_uncompressed_size(const char* src, int type)
+/* Get the decompressed size of file 'fd', compressed using 'type' */
+int64_t get_uncompressed_size(int fd, int type)
 {
-	int fd = -1;
-	int64_t ret = -1;
-
-	if (!bled_initialized) {
-		bb_error_msg("The library has not been initialized");
-		return -1;
-	}
+	int64_t size = -1;
 
 	if ((type < 0) || (type >= BLED_COMPRESSION_MAX)) {
 		bb_error_msg("Unsupported compression format");
-		goto err;
+		return -1;
 	}
+	size = _get_uncompressed_size[type](fd);
 
-	fd = _openU(src, _O_RDONLY | _O_BINARY, 0);
-	if (fd < 0)
-		return DECOMP_SIZE_ERROR;
-
-	ret = get_uncompressed_size[type](fd);
-
-err:
-	if (fd > 0)
-		_close(fd);
-	return ret;
+	/* Make sure to reset our file pointer */
+	lseek(fd, 0, SEEK_SET);
+	return size;
 }

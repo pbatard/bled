@@ -16,7 +16,7 @@
 #endif
 
 typedef void (*printf_t) (const char* format, ...);
-typedef void (*progress_t) (const uint64_t read_bytes);
+typedef void (*progress_t) (const int64_t read_bytes);
 typedef int (*read_t)(int fd, void* buf, unsigned int count);
 typedef int (*write_t)(int fd, const void* buf, unsigned int count);
 typedef void (*switch_t)(const char* filename, const uint64_t size);

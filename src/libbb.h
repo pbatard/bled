@@ -126,6 +126,7 @@ extern jmp_buf bb_error_jmp;
 extern char* bb_virtual_buf;
 extern size_t bb_virtual_len, bb_virtual_pos;
 extern int bb_virtual_fd;
+extern bool bb_progress_on_write;
 
 uint32_t* crc32_filltable(uint32_t *crc_table, int endian);
 uint32_t crc32_le(uint32_t crc, unsigned char const *p, size_t len, uint32_t *crc32table_le);
@@ -154,7 +155,7 @@ struct timeval64 {
 };
 
 extern void (*bled_printf) (const char* format, ...);
-extern void (*bled_progress) (const uint64_t processed_bytes);
+extern void (*bled_progress) (const int64_t processed_bytes);
 extern void (*bled_switch) (const char* filename, const uint64_t filesize);
 extern int (*bled_read)(int fd, void* buf, unsigned int count);
 extern int (*bled_write)(int fd, const void* buf, unsigned int count);
@@ -193,8 +194,8 @@ static inline int fnmatch(const char *pattern, const char *string, int flags) { 
 static inline pid_t wait(int* status) { *status = 4; return -1; }
 #define wait_any_nohang wait
 
-/* This enables the display of a progress based on the number of bytes read */
-extern uint64_t bb_total_rb;
+/* This enables the display of a progress based on the number of bytes read/written */
+extern uint64_t bb_total_rb, bb_total_wb;
 static inline int full_read(int fd, void *buf, unsigned int count) {
 	int rb;
 
@@ -225,23 +226,28 @@ static inline int full_read(int fd, void *buf, unsigned int count) {
 	} else {
 		rb = (bled_read != NULL) ? bled_read(fd, buf, count) : _read(fd, buf, count);
 	}
-	if (rb > 0) {
+	if (bled_progress != NULL && !bb_progress_on_write && rb > 0) {
 		bb_total_rb += rb;
-		if (bled_progress != NULL)
-			bled_progress(bb_total_rb);
+		bled_progress(bb_total_rb);
 	}
 	return rb;
 }
 
 static inline int full_write(int fd, const void* buffer, unsigned int count)
 {
+	int wb;
 	/* None of our r/w buffers should be larger than BB_BUFSIZE */
 	if (count > BB_BUFSIZE) {
 		errno = E2BIG;
 		return -1;
 	}
 
-	return (bled_write != NULL) ? bled_write(fd, buffer, count) : _write(fd, buffer, count);
+	wb = (bled_write != NULL) ? bled_write(fd, buffer, count) : _write(fd, buffer, count);
+	if (bled_progress != NULL && bb_progress_on_write && wb > 0) {
+		bb_total_wb += wb;
+		bled_progress(bb_total_wb);
+	}
+	return wb;
 }
 
 static inline void bb_copyfd_exact_size(int fd1, int fd2, off_t size)

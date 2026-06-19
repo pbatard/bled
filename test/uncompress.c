@@ -38,25 +38,30 @@ static comp_assoc file_assoc[] = {
 	{ ".zst", BLED_COMPRESSION_ZSTD },
 };
 
-static DWORD LastRefresh;
-static uint64_t src_size;
-
 void switch_func(const char* filename, const uint64_t filesize)
 {
 	printf("Extracting '%s' (%lld bytes)\n", filename, filesize);
 }
 
-void progress_func(const uint64_t read_bytes)
+void progress_func(const int64_t read_bytes)
 {
+	static DWORD LastRefresh;
+	static uint64_t total_bytes = 0;
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	float progress;
 
-	if ((GetTickCount() < (LastRefresh + 100)) && (read_bytes != src_size))
+	if (read_bytes < 0) {
+		total_bytes = -read_bytes;
+		LastRefresh = 0;
+		return;
+	}
+
+	if ((GetTickCount() < (LastRefresh + 100)) && (read_bytes != total_bytes))
 		return;
 	LastRefresh = GetTickCount();
 
-	progress = (100.0f*read_bytes) / (1.0f*src_size);
+	progress = (100.0f * read_bytes) / (1.0f * total_bytes);
 	GetConsoleScreenBufferInfo(hConsole, &csbi);
 	csbi.dwCursorPosition.X = 0;
 	SetConsoleCursorPosition(hConsole, csbi.dwCursorPosition);
@@ -104,11 +109,6 @@ int main(int argc, char** argv)
 					fprintf(stderr, "Could not open '%s': error 0x%0X\n", argv[1], (uint32_t)GetLastError());
 					goto out;
 				}
-				if (!GetFileSizeEx(hSrc, &li)) {
-					fprintf(stderr, "Unable to get the size of '%s': error 0x%0X\n", argv[1], (uint32_t)GetLastError());
-					goto out;
-				}
-				src_size = li.QuadPart;
 
 				hDst = CreateFileA(argv[2], GENERIC_WRITE, FILE_SHARE_WRITE, NULL,
 					CREATE_ALWAYS, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
@@ -117,7 +117,6 @@ int main(int argc, char** argv)
 					goto out;
 				}
 
-				LastRefresh = 0;
 				bled_init(0, NULL, NULL, NULL, progress_func, NULL, NULL);
 				wb = bled_uncompress_with_handles(hSrc, hDst, file_assoc[i].type);
 				bled_exit();
