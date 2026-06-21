@@ -46,7 +46,14 @@ int main(int argc, char** argv)
 
 	bled_init(0, NULL, NULL, NULL, NULL, NULL, NULL);
 
-	printf("DECOMPRESS TO BUFFER:\n");
+	printf("GET UNCOMPRESSED SIZE:\n");
+	for (i = 0; i < ARRAYSIZE(test_files); i++) {
+		sprintf_s(src, sizeof(src), "%s%s.%s", BASE_PATH, BASE_FILE, test_files[i].ext);
+		r = bled_get_uncompressed_size(src, test_files[i].type);
+		printf("  %s:\t%" PRIi64 "\n", test_files[i].ext, r);
+	}
+
+	printf("\nDECOMPRESS TO BUFFER:\n");
 	buffer = malloc(BUFSIZE);
 	for (i = 0; i < ARRAYSIZE(test_files); i++) {
 		sprintf_s(src, sizeof(src), "%s%s.%s", BASE_PATH, BASE_FILE, test_files[i].ext);
